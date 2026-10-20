@@ -9,7 +9,7 @@ const base: Question = {
   secondOperand: 4,
   displayText: '3 + 4 = ?',
   correctAnswer: 7,
-  choices: [],
+  choices: [7, 8, 6, 9],
   difficulty: 1,
   source: 'regular',
 }
@@ -72,9 +72,29 @@ describe('getQuestionErrors', () => {
       firstOperand: 9,
       secondOperand: 9,
       correctAnswer: 81,
+      choices: [81, 80, 72, 90],
       difficulty: 1,
     }
     expect(isValidQuestion(q)).toBe(false)
     expect(isValidQuestion({ ...q, difficulty: 3 })).toBe(true)
+  })
+})
+
+describe('answer choice validation', () => {
+  it('requires exactly four choices', () => {
+    expect(isValidQuestion({ ...base, choices: [7, 8, 6] })).toBe(false)
+    expect(isValidQuestion({ ...base, choices: [7, 8, 6, 9, 5] })).toBe(false)
+  })
+
+  it('requires unique choices', () => {
+    expect(isValidQuestion({ ...base, choices: [7, 8, 8, 9] })).toBe(false)
+  })
+
+  it('requires the correct answer to be one of the choices', () => {
+    expect(isValidQuestion({ ...base, choices: [5, 8, 6, 9] })).toBe(false)
+  })
+
+  it('requires whole-number choices', () => {
+    expect(isValidQuestion({ ...base, choices: [7, 8.5, 6, 9] })).toBe(false)
   })
 })

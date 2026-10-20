@@ -194,3 +194,31 @@ Files added:
 - `src/services/questionGenerator.ts`: `generateQuestion(operation, difficulty)` and `generateRandomQuestion(operations, difficulty)`; validates each question, retries up to 5 times, then throws `QuestionGenerationError`.
 - Tests next to each file, plus `src/test/helpers.ts` (seeded random generator for repeatable tests).
 - `src/utils/practiceConfig.ts` now reuses the shared operation symbols.
+
+## Dialogue 25
+
+**User:** what does this warning mean: `warning: in the working copy of 'src/utils/validation.ts', LF will be replaced by CRLF the next time Git touches it`
+
+**Claude:** Harmless line-ending notice. Files created here use LF; Git on Windows (`core.autocrlf=true`) converts to CRLF in the working copy and stores LF in the repo. Nothing is broken; optionally add a `.gitattributes` with `* text=auto eol=lf` to silence it.
+
+## Dialogue 26
+
+**User:** please do that
+
+**Claude:** Added `.gitattributes` (`* text=auto eol=lf`) so files use LF line endings on every platform, which removes the LF/CRLF warning. Not committed, per the user's instruction.
+
+## Dialogue 27
+
+**User:** lets move onto phase 5. please implement it
+
+**Claude:** Implemented Phase 5 (multiple-choice answers) and checked off all its items in `documentation/implementation-list.md`. Lint, build and 113 tests pass. No commit and no new npm packages.
+
+How it works: every generated question now has four choices (the correct answer plus three believable wrong answers), shuffled so the correct answer lands in all four positions. Wrong answers are whole numbers, unique, never negative, and within a believable distance of the answer. Each operation has its own common-mistake distractors (carry and borrow slips, neighboring times-table facts, fact-family answers for division). The search is bounded and raises `QuestionGenerationError` rather than looping forever.
+
+Files added or changed:
+
+- `src/services/distractors.ts`: `generateDistractors` and `buildChoices` (new).
+- `src/services/errors.ts`: `QuestionGenerationError`, moved out of the generator to avoid a circular import (new).
+- `src/services/questionGenerator.ts`: now fills in and validates the four choices.
+- `src/utils/validation.ts`: added choice checks (exactly four, unique, whole numbers, correct answer present once); problem-only checks are now `getProblemErrors`.
+- Tests: `src/services/distractors.test.ts` (new), plus updated generator and validation tests.

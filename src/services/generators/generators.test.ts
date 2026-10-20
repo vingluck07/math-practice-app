@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { LEVELS, SAMPLES, seededRng } from '../../test/helpers'
 import type { Question } from '../../types/question'
-import { getQuestionErrors } from '../../utils/validation'
+import { getProblemErrors } from '../../utils/validation'
 import { generateAddition } from './addition'
 import { generateDivision } from './division'
 import { generateMultiplication } from './multiplication'
@@ -28,7 +28,7 @@ describe('every generator returns a well-formed Question', () => {
       expect(q.source).toBe('regular')
       expect(q.id).toBeTruthy()
       expect(q.displayText).toBe(`${q.firstOperand} ${symbol} ${q.secondOperand} = ?`)
-      expect(getQuestionErrors(q)).toEqual([])
+      expect(getProblemErrors(q)).toEqual([])
     }
   })
 

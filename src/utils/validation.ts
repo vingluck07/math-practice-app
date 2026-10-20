@@ -28,12 +28,8 @@ function fitsOperandRules(rules: OperandRules, first: number, second: number): b
   return rules.variants.some((v) => inRange(first, v.first) && inRange(second, v.second))
 }
 
-/**
- * Returns a list of problems with a question (empty when it is valid).
- * Answer-choice checks (four unique choices including the answer) are added
- * together with choice generation in Phase 5.
- */
-export function getQuestionErrors(question: Question): string[] {
+/** Checks the math problem itself (operands, answer, difficulty rules), not the answer choices. */
+export function getProblemErrors(question: Question): string[] {
   const errors: string[] = []
   const { operation, difficulty, firstOperand: a, secondOperand: b, correctAnswer } = question
 
@@ -91,6 +87,28 @@ export function getQuestionErrors(question: Question): string[] {
       break
   }
   return errors
+}
+
+/** Checks the answer choices: exactly four, whole numbers, unique, and including the answer. */
+export function getChoiceErrors(question: Question): string[] {
+  const errors: string[] = []
+  const { choices, correctAnswer } = question
+  if (!Array.isArray(choices) || choices.length !== 4) {
+    return ['There must be exactly four answer choices.']
+  }
+  if (!choices.every((c) => Number.isInteger(c)))
+    errors.push('Answer choices must be whole numbers.')
+  if (new Set(choices).size !== choices.length) errors.push('Answer choices must be unique.')
+  if (choices.filter((c) => c === correctAnswer).length !== 1) {
+    errors.push('The correct answer must appear exactly once among the choices.')
+  }
+  return errors
+}
+
+/** Returns every problem with a question (empty when it is valid). */
+export function getQuestionErrors(question: Question): string[] {
+  const problemErrors = getProblemErrors(question)
+  return problemErrors.length > 0 ? problemErrors : getChoiceErrors(question)
 }
 
 export function isValidQuestion(question: Question): boolean {

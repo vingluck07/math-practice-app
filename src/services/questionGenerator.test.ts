@@ -20,9 +20,21 @@ describe('generateQuestion', () => {
         expect(q.operation).toBe(operation)
         expect(q.difficulty).toBe(level)
         expect(getQuestionErrors(q)).toEqual([])
+        expect(q.choices).toHaveLength(4)
+        expect(q.choices).toContain(q.correctAnswer)
       }
     },
   )
+
+  it('does not keep the correct answer in a predictable position', () => {
+    const rng = seededRng(5)
+    const positions = new Set<number>()
+    for (let i = 0; i < 200; i++) {
+      const q = generateQuestion('multiplication', 2, { rng })
+      positions.add(q.choices.indexOf(q.correctAnswer))
+    }
+    expect(positions.size).toBe(4)
+  })
 
   it('throws a QuestionGenerationError for an unsupported operation', () => {
     expect(() => generateQuestion('modulo' as MathOperation, 1)).toThrow(QuestionGenerationError)

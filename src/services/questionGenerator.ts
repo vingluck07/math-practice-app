@@ -1,6 +1,8 @@
 import type { DifficultyLevel, MathOperation, Question } from '../types/question'
 import { pickRandom } from '../utils/math'
 import { getQuestionErrors, isDifficultyLevel, isMathOperation } from '../utils/validation'
+import { buildChoices } from './distractors'
+import { QuestionGenerationError } from './errors'
 import { generateAddition } from './generators/addition'
 import { generateDivision } from './generators/division'
 import { generateMultiplication } from './generators/multiplication'
@@ -12,12 +14,7 @@ export type { GeneratorOptions }
 /** How many times to retry if a generated question fails validation. */
 const MAX_ATTEMPTS = 5
 
-export class QuestionGenerationError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'QuestionGenerationError'
-  }
-}
+export { QuestionGenerationError }
 
 const GENERATORS: Record<
   MathOperation,
@@ -29,7 +26,7 @@ const GENERATORS: Record<
   division: generateDivision,
 }
 
-/** Generates one validated question for the given operation and difficulty. */
+/** Generates one validated question, with four shuffled answer choices, for the given operation and difficulty. */
 export function generateQuestion(
   operation: MathOperation,
   difficulty: DifficultyLevel,
@@ -44,7 +41,8 @@ export function generateQuestion(
 
   let errors: string[] = []
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const question = GENERATORS[operation](difficulty, options)
+    const problem = GENERATORS[operation](difficulty, options)
+    const question = { ...problem, choices: buildChoices(problem, { rng: options.rng }) }
     errors = getQuestionErrors(question)
     if (errors.length === 0) return question
   }
