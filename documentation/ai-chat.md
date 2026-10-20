@@ -169,3 +169,9 @@ Review mode (regular vs. similar questions) is in the spec but not in the Phase 
 **User:** looks good. i will do a git push and move onto phase 4
 
 **Claude:** Acknowledged. Phase 3 is approved and committed locally; waiting for the user's go-ahead on Phase 4.
+
+## Dialogue 23
+
+**User:** how often do i need to npm install?
+
+**Claude:** Only when `package.json`/`package-lock.json` change (after a pull, or when Claude adds a dependency), when `node_modules` is missing, or after changing Node versions. Not needed for ordinary code edits or for `npm run dev`. Said Claude will mention it whenever a dependency is added.
