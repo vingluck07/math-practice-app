@@ -1,6 +1,8 @@
 .btn {
-  --btn-bg: var(--color-primary);
-  --btn-bg-hover: var(--color-primary-dark);
+  --btn-from: #4083f5;
+  --btn-to: #2f6fed;
+  --btn-hover-from: #2f6fed;
+  --btn-hover-to: #1f56c4;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -9,7 +11,7 @@
   padding: 0.75rem 1.75rem;
   border: 0;
   border-radius: var(--radius);
-  background: var(--btn-bg);
+  background: linear-gradient(180deg, var(--btn-from), var(--btn-to));
   color: #fff;
   font: inherit;
   font-size: 1.35rem;
@@ -24,7 +26,7 @@
 }
 
 .btn:hover {
-  background: var(--btn-bg-hover);
+  background: linear-gradient(180deg, var(--btn-hover-from), var(--btn-hover-to));
 }
 
 .btn:active {
@@ -38,14 +40,18 @@
 }
 
 .btn--secondary {
-  --btn-bg: var(--color-secondary);
-  --btn-bg-hover: var(--color-secondary-dark);
+  --btn-from: #ffc65c;
+  --btn-to: #ff9f1c;
+  --btn-hover-from: #ffb844;
+  --btn-hover-to: #e88a00;
   color: var(--color-text);
 }
 
 .btn--accent {
-  --btn-bg: var(--color-accent);
-  --btn-bg-hover: var(--color-accent-dark);
+  --btn-from: #1fa866;
+  --btn-to: #17935a;
+  --btn-hover-from: #17935a;
+  --btn-hover-to: #0f7a47;
 }
 
 @media (prefers-reduced-motion: reduce) {

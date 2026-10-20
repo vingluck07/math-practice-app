@@ -125,3 +125,9 @@ Files added or changed:
 **User:** that worked. lets go back to phase 2 now that git is set up. i like the style of the page but i want the font to be more playful. can you make those changes
 
 **Claude:** Switched the app font to Fredoka, a rounded, playful typeface. It is installed as the npm package `@fontsource-variable/fredoka` and bundled with the app, so it makes no external requests (consistent with the spec's privacy section). Changed `src/main.tsx`, `src/index.css` and `src/components/layout/Header.css`; lint, build and tests pass. The user needs to run `npm install` to get the new package.
+
+## Dialogue 18
+
+**User:** much better. lets add a light gradient to the background and the buttons to make it more fun. The white parts should stay pure white
+
+**Claude:** Added a soft cream-pink-blue gradient to the page background (`--gradient-bg` in `src/index.css`) and top-to-bottom gradients to all three button styles (`src/components/common/Button.css`). The header and cards are unchanged and stay pure white. Kept white button text above a 3:1 contrast ratio, which made the green buttons slightly darker than before. Lint, build and tests pass.
