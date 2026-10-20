@@ -131,3 +131,9 @@ Files added or changed:
 **User:** much better. lets add a light gradient to the background and the buttons to make it more fun. The white parts should stay pure white
 
 **Claude:** Added a soft cream-pink-blue gradient to the page background (`--gradient-bg` in `src/index.css`) and top-to-bottom gradients to all three button styles (`src/components/common/Button.css`). The header and cards are unchanged and stay pure white. Kept white button text above a 3:1 contrast ratio, which made the green buttons slightly darker than before. Lint, build and tests pass.
+
+## Dialogue 19
+
+**User:** i dont like the blue in the background, i liked the color from the plain background, I just want it to fade into a reddish orangish color
+
+**Claude:** Changed the background gradient in `src/index.css` to start at the original cream (`#fff8e7`) and fade through light peach into a soft reddish-orange (`#ffc4a6`). The blue is gone; buttons and white areas are unchanged.

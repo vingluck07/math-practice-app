@@ -1,6 +1,6 @@
 :root {
   --color-bg: #fff8e7;
-  --gradient-bg: linear-gradient(160deg, #fff3d6 0%, #ffe3ef 50%, #dcefff 100%);
+  --gradient-bg: linear-gradient(160deg, #fff8e7 0%, #ffe2c7 55%, #ffc4a6 100%);
   --color-surface: #ffffff;
   --color-text: #1f2a44;
   --color-muted: #5b6785;
