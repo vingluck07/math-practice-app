@@ -10,13 +10,21 @@ interface CardBackProps {
   onResult: (gotItRight: boolean) => void
   /** Called when the student is ready for the next question. */
   onNext: () => void
+  /** Label for the button shown after the answer is revealed. */
+  nextLabel?: string
 }
 
 /**
  * Two steps: first a confidence check ("Do you think you got it right?") that
  * does not show the answer, then the correct answer is revealed.
  */
-export default function CardBack({ question, selectedAnswer, onResult, onNext }: CardBackProps) {
+export default function CardBack({
+  question,
+  selectedAnswer,
+  onResult,
+  onNext,
+  nextLabel = 'Next Question',
+}: CardBackProps) {
   const [gotItRight, setGotItRight] = useState<boolean | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const revealed = gotItRight !== null
@@ -57,7 +65,7 @@ export default function CardBack({ question, selectedAnswer, onResult, onNext }:
               : `Good try! The correct answer is ${question.correctAnswer}.`}
           </p>
           <Button variant="accent" onClick={onNext}>
-            Next Question
+            {nextLabel}
           </Button>
         </>
       ) : (

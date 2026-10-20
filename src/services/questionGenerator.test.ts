@@ -5,6 +5,7 @@ import { getQuestionErrors } from '../utils/validation'
 import {
   QuestionGenerationError,
   generateQuestion,
+  generateNextQuestion,
   generateRandomQuestion,
 } from './questionGenerator'
 
@@ -63,5 +64,23 @@ describe('generateRandomQuestion', () => {
 
   it('throws when no operation is enabled', () => {
     expect(() => generateRandomQuestion([], 1)).toThrow(QuestionGenerationError)
+  })
+})
+
+describe('generateNextQuestion', () => {
+  it('does not repeat the previous problem', () => {
+    const rng = seededRng(123)
+    let previous = generateNextQuestion(['multiplication'], 1, undefined, { rng })
+    for (let i = 0; i < 300; i++) {
+      const next = generateNextQuestion(['multiplication'], 1, previous, { rng })
+      const same =
+        next.firstOperand === previous.firstOperand && next.secondOperand === previous.secondOperand
+      expect(same).toBe(false)
+      previous = next
+    }
+  })
+
+  it('works without a previous question', () => {
+    expect(generateNextQuestion(['addition'], 1).operation).toBe('addition')
   })
 })

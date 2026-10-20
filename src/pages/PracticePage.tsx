@@ -1,38 +1,39 @@
-import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useSettings } from '../app/settingsContext'
-import { ButtonLink } from '../components/common/Button'
+import { Button, ButtonLink } from '../components/common/Button'
+import ConfirmDialog from '../components/common/ConfirmDialog'
+import ProgressBar from '../components/practice/ProgressBar'
 import QuestionCard from '../components/practice/QuestionCard'
-import { generateRandomQuestion } from '../services/questionGenerator'
+import { usePracticeSession } from '../hooks/usePracticeSession'
 import type { PracticeConfig } from '../types/session'
+import { isValidPracticeConfig } from '../utils/validation'
+import './PracticePage.css'
 
-function readConfig(state: unknown): PracticeConfig | null {
-  const config = (state as { config?: PracticeConfig } | null)?.config
-  return config && config.operations?.length > 0 ? config : null
-}
-
-/**
- * Card preview: shows real questions one at a time. Recording results, session
- * progress and the summary arrive with the practice-session work (Phase 7).
- */
-function CardPreview({ config }: { config: PracticeConfig }) {
+function ActiveSession({ config }: { config: PracticeConfig }) {
   const { settings } = useSettings()
-  const [questionNumber, setQuestionNumber] = useState(1)
-  const [question, setQuestion] = useState(() =>
-    generateRandomQuestion(config.operations, config.difficulty),
-  )
-  const finished = config.sessionLength !== 'continuous' && questionNumber > config.sessionLength
+  const navigate = useNavigate()
+  const practice = usePracticeSession(config)
+  const [confirmingEnd, setConfirmingEnd] = useState(false)
+  const { state } = practice
+  const isContinuous = config.sessionLength === 'continuous'
 
-  function handleNext() {
-    setQuestionNumber((n) => n + 1)
-    setQuestion(generateRandomQuestion(config.operations, config.difficulty))
-  }
+  // When the session ends (last question done, or End Session), show the summary.
+  const finished = state !== null && !state.isActive
+  useEffect(() => {
+    if (state && finished) {
+      navigate('/practice/summary', {
+        replace: true,
+        state: { session: state.session, attempts: state.attempts },
+      })
+    }
+  }, [finished, state, navigate])
 
-  if (finished) {
+  if (practice.failed || !state) {
     return (
       <section>
-        <h1>That&apos;s all the questions!</h1>
-        <p>The session summary is coming soon.</p>
+        <h1>Oops!</h1>
+        <p>We had trouble making a question. Let&apos;s try setting up again.</p>
         <ButtonLink to="/practice/setup" variant="accent">
           Back to Practice Setup
         </ButtonLink>
@@ -43,33 +44,46 @@ function CardPreview({ config }: { config: PracticeConfig }) {
   return (
     <section>
       <h1 className="sr-only">Practice</h1>
+      {!isContinuous && (
+        <ProgressBar completed={state.session.attempted} total={config.sessionLength as number} />
+      )}
       <QuestionCard
-        key={question.id}
-        question={question}
-        questionNumber={questionNumber}
+        key={state.currentQuestion.id}
+        question={state.currentQuestion}
+        questionNumber={state.currentQuestionIndex + 1}
         total={config.sessionLength}
         animate={settings.cardAnimationEnabled}
-        onResult={() => {}} // Recording results arrives in Phase 7.
-        onNext={handleNext}
+        nextLabel={practice.isLastQuestion ? 'See Results' : 'Next Question'}
+        onResult={practice.recordResult}
+        onNext={practice.next}
       />
+      {isContinuous && (
+        <div className="practice__end">
+          <Button variant="secondary" onClick={() => setConfirmingEnd(true)}>
+            End Session
+          </Button>
+        </div>
+      )}
+      {confirmingEnd && (
+        <ConfirmDialog
+          title="End this session?"
+          message="You will see how you did so far."
+          confirmLabel="Yes, End Session"
+          cancelLabel="Keep Practicing"
+          onConfirm={practice.end}
+          onCancel={() => setConfirmingEnd(false)}
+        />
+      )}
     </section>
   )
 }
 
 export default function PracticePage() {
-  const config = readConfig(useLocation().state)
+  const config = (useLocation().state as { config?: unknown } | null)?.config
 
-  if (!config) {
-    return (
-      <section>
-        <h1>Practice</h1>
-        <p>Let&apos;s pick what to practice first.</p>
-        <ButtonLink to="/practice/setup" variant="accent">
-          Go to Practice Setup
-        </ButtonLink>
-      </section>
-    )
+  // No valid setup (for example, the page was opened directly): go choose settings.
+  if (!isValidPracticeConfig(config)) {
+    return <Navigate to="/practice/setup" replace />
   }
-
-  return <CardPreview config={config} />
+  return <ActiveSession config={config} />
 }

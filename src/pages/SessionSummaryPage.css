@@ -1,0 +1,10 @@
+.summary__text {
+  max-width: 32rem;
+  margin: 0 auto 1rem;
+  font-size: 1.4rem;
+}
+
+.summary__note {
+  margin: 0 auto 2rem;
+  color: var(--color-muted);
+}

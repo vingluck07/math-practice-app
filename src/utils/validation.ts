@@ -1,4 +1,5 @@
 import type { DifficultyLevel, MathOperation, Question } from '../types/question'
+import type { PracticeConfig } from '../types/session'
 import {
   ADDITION_RULES,
   DIVISION_RULES,
@@ -113,4 +114,23 @@ export function getQuestionErrors(question: Question): string[] {
 
 export function isValidQuestion(question: Question): boolean {
   return getQuestionErrors(question).length === 0
+}
+
+/** Checks setup data that arrives through navigation, which could be missing or malformed. */
+export function isValidPracticeConfig(value: unknown): value is PracticeConfig {
+  if (typeof value !== 'object' || value === null) return false
+  const { operations, difficulty, sessionLength } = value as Record<string, unknown>
+  const lengthOk =
+    sessionLength === 'continuous' ||
+    (typeof sessionLength === 'number' &&
+      Number.isInteger(sessionLength) &&
+      sessionLength >= 1 &&
+      sessionLength <= 1000)
+  return (
+    Array.isArray(operations) &&
+    operations.length > 0 &&
+    operations.every(isMathOperation) &&
+    isDifficultyLevel(difficulty) &&
+    lengthOk
+  )
 }

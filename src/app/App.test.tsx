@@ -28,13 +28,17 @@ describe('AppRoutes', () => {
 
   it.each([
     ['/practice/setup', 'Set Up Your Practice'],
-    ['/practice/session', 'Practice'],
     ['/practice/summary', 'Session Summary'],
     ['/statistics', 'Statistics'],
     ['/settings', 'Settings'],
   ])('renders %s', (path, heading) => {
     renderAt(path)
     expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument()
+  })
+
+  it('sends /practice/session without setup data back to the setup page', () => {
+    renderAt('/practice/session')
+    expect(screen.getByRole('heading', { name: 'Set Up Your Practice' })).toBeInTheDocument()
   })
 
   it('shows a fallback page for unknown routes', () => {

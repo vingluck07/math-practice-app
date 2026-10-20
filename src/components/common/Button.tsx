@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
 import './Button.css'
 
@@ -9,7 +9,8 @@ interface SharedProps {
   children: ReactNode
 }
 
-type ButtonProps = SharedProps & ButtonHTMLAttributes<HTMLButtonElement>
+type ButtonProps = SharedProps &
+  ButtonHTMLAttributes<HTMLButtonElement> & { ref?: Ref<HTMLButtonElement> }
 type ButtonLinkProps = SharedProps & Omit<LinkProps, 'children'>
 
 function classes(variant: ButtonVariant, extra?: string) {

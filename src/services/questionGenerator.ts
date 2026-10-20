@@ -62,3 +62,28 @@ export function generateRandomQuestion(
   }
   return generateQuestion(pickRandom(operations, options.rng), difficulty, options)
 }
+
+/** How many times to re-roll to avoid showing the same problem twice in a row. */
+const MAX_REPEAT_RETRIES = 10
+
+function isSameProblem(a: Question, b: Question): boolean {
+  return (
+    a.operation === b.operation &&
+    a.firstOperand === b.firstOperand &&
+    a.secondOperand === b.secondOperand
+  )
+}
+
+/** Like `generateRandomQuestion`, but avoids repeating the previous problem. */
+export function generateNextQuestion(
+  operations: readonly MathOperation[],
+  difficulty: DifficultyLevel,
+  previous?: Question,
+  options: GeneratorOptions = {},
+): Question {
+  let question = generateRandomQuestion(operations, difficulty, options)
+  for (let i = 0; i < MAX_REPEAT_RETRIES && previous && isSameProblem(question, previous); i++) {
+    question = generateRandomQuestion(operations, difficulty, options)
+  }
+  return question
+}

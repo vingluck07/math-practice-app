@@ -1,0 +1,31 @@
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(31, 42, 68, 0.55);
+}
+
+.dialog {
+  width: min(100%, 28rem);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.dialog__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 480px) {
+  .dialog__actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}

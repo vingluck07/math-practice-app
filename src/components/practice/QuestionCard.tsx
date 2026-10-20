@@ -15,6 +15,8 @@ interface QuestionCardProps {
   onResult: (gotItRight: boolean, selectedAnswer: number) => void
   /** The student is ready for the next question (after the answer is revealed). */
   onNext: () => void
+  /** Label for the button shown after the answer is revealed. */
+  nextLabel?: string
 }
 
 /**
@@ -28,6 +30,7 @@ export default function QuestionCard({
   animate = true,
   onResult,
   onNext,
+  nextLabel,
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isCardFlipped, setIsCardFlipped] = useState(false)
@@ -93,6 +96,7 @@ export default function QuestionCard({
               selectedAnswer !== null && onResult(gotItRight, selectedAnswer)
             }
             onNext={onNext}
+            nextLabel={nextLabel}
           />
         </div>
       </div>

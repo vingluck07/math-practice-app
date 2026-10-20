@@ -1,4 +1,4 @@
-import type { DifficultyLevel, MathOperation, QuestionSource } from './question'
+import type { DifficultyLevel, MathOperation, Question, QuestionSource } from './question'
 
 export type SessionLength = number | 'continuous'
 
@@ -34,4 +34,14 @@ export interface PracticeConfig {
   operations: MathOperation[]
   difficulty: DifficultyLevel
   sessionLength: SessionLength
+}
+
+/** Everything the practice page needs to run one session. */
+export interface PracticeSessionState {
+  session: PracticeSession
+  currentQuestion: Question
+  /** Zero-based; the question number shown to the student is this plus one. */
+  currentQuestionIndex: number
+  attempts: PracticeAttempt[]
+  isActive: boolean
 }

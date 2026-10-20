@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Question } from '../types/question'
-import { getQuestionErrors, isValidQuestion } from './validation'
+import { getQuestionErrors, isValidPracticeConfig, isValidQuestion } from './validation'
 
 const base: Question = {
   id: 'q1',
@@ -96,5 +96,32 @@ describe('answer choice validation', () => {
 
   it('requires whole-number choices', () => {
     expect(isValidQuestion({ ...base, choices: [7, 8.5, 6, 9] })).toBe(false)
+  })
+})
+
+describe('isValidPracticeConfig', () => {
+  const valid = { operations: ['addition', 'division'], difficulty: 3, sessionLength: 10 }
+
+  it('accepts good setup data, including continuous practice', () => {
+    expect(isValidPracticeConfig(valid)).toBe(true)
+    expect(isValidPracticeConfig({ ...valid, sessionLength: 'continuous' })).toBe(true)
+  })
+
+  it('rejects missing or malformed data', () => {
+    for (const bad of [
+      undefined,
+      null,
+      'addition',
+      {},
+      { ...valid, operations: [] },
+      { ...valid, operations: ['addition', 'power'] },
+      { ...valid, operations: 'addition' },
+      { ...valid, difficulty: 5 },
+      { ...valid, sessionLength: 0 },
+      { ...valid, sessionLength: 2.5 },
+      { ...valid, sessionLength: 'forever' },
+    ]) {
+      expect(isValidPracticeConfig(bad)).toBe(false)
+    }
   })
 })
