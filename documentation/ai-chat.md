@@ -175,3 +175,22 @@ Review mode (regular vs. similar questions) is in the spec but not in the Phase 
 **User:** how often do i need to npm install?
 
 **Claude:** Only when `package.json`/`package-lock.json` change (after a pull, or when Claude adds a dependency), when `node_modules` is missing, or after changing Node versions. Not needed for ordinary code edits or for `npm run dev`. Said Claude will mention it whenever a dependency is added.
+
+## Dialogue 24
+
+**User:** for the future, you don't need to perform local commits. I can just push remotely after each phase. lets move onto phase 4. please implement it
+
+**Claude:** Implemented Phase 4 (basic question generation) and checked off all its items in `documentation/implementation-list.md`. Lint, build and 84 tests pass. No git commit was made, per the user's instruction. No new npm packages, so no `npm install` is needed.
+
+Answer choices are left empty (`choices: []`) because choice generation is Phase 5; the validator will check the four-unique-choices rule then. Operands follow spec section 7: for example, subtraction never goes negative, division picks a divisor and whole quotient first so zero divisors and remainders are impossible, and multiplication at level 3 is one digit by one or two digits.
+
+Files added:
+
+- `src/utils/math.ts`: `randomInt`, `pickRandom`, operation symbols and question-text formatting.
+- `src/utils/shuffle.ts`, `src/utils/ids.ts`: shuffle and unique-ID utilities.
+- `src/utils/difficultyRules.ts`: the number ranges for every operation and level, in one place.
+- `src/utils/validation.ts`: `getQuestionErrors` / `isValidQuestion`, which checks operation, difficulty ranges, correct answer, no negatives, no division by zero, whole-number division.
+- `src/services/generators/addition.ts`, `subtraction.ts`, `multiplication.ts`, `division.ts`, `shared.ts`: one generator per operation plus a shared builder.
+- `src/services/questionGenerator.ts`: `generateQuestion(operation, difficulty)` and `generateRandomQuestion(operations, difficulty)`; validates each question, retries up to 5 times, then throws `QuestionGenerationError`.
+- Tests next to each file, plus `src/test/helpers.ts` (seeded random generator for repeatable tests).
+- `src/utils/practiceConfig.ts` now reuses the shared operation symbols.

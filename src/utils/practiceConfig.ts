@@ -1,5 +1,6 @@
 import type { DifficultyLevel, MathOperation } from '../types/question'
 import type { PracticeConfig, SessionLength } from '../types/session'
+import { OPERATION_SYMBOLS } from './math'
 
 export interface OperationOption {
   value: MathOperation
@@ -8,10 +9,10 @@ export interface OperationOption {
 }
 
 export const OPERATION_OPTIONS: OperationOption[] = [
-  { value: 'addition', label: 'Addition', symbol: '+' },
-  { value: 'subtraction', label: 'Subtraction', symbol: '−' },
-  { value: 'multiplication', label: 'Multiplication', symbol: '×' },
-  { value: 'division', label: 'Division', symbol: '÷' },
+  { value: 'addition', label: 'Addition', symbol: OPERATION_SYMBOLS.addition },
+  { value: 'subtraction', label: 'Subtraction', symbol: OPERATION_SYMBOLS.subtraction },
+  { value: 'multiplication', label: 'Multiplication', symbol: OPERATION_SYMBOLS.multiplication },
+  { value: 'division', label: 'Division', symbol: OPERATION_SYMBOLS.division },
 ]
 
 export const ALL_OPERATIONS: MathOperation[] = OPERATION_OPTIONS.map((o) => o.value)
