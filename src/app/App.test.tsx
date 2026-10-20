@@ -23,11 +23,11 @@ describe('AppRoutes', () => {
     const user = userEvent.setup()
     renderAt('/')
     await user.click(screen.getByRole('link', { name: 'Start Practice' }))
-    expect(screen.getByRole('heading', { name: 'Practice Setup' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Set Up Your Practice' })).toBeInTheDocument()
   })
 
   it.each([
-    ['/practice/setup', 'Practice Setup'],
+    ['/practice/setup', 'Set Up Your Practice'],
     ['/practice/session', 'Practice'],
     ['/practice/summary', 'Session Summary'],
     ['/statistics', 'Statistics'],

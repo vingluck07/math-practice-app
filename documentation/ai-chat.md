@@ -137,3 +137,29 @@ Files added or changed:
 **User:** i dont like the blue in the background, i liked the color from the plain background, I just want it to fade into a reddish orangish color
 
 **Claude:** Changed the background gradient in `src/index.css` to start at the original cream (`#fff8e7`) and fade through light peach into a soft reddish-orange (`#ffc4a6`). The blue is gone; buttons and white areas are unchanged.
+
+## Dialogue 20
+
+**User:** looks much better. could you push it for me
+
+**Claude:** Could not push: this environment has no GitHub credentials (tried again, same error). The repo was 3 commits ahead of `origin/main`; asked the user to run `git push` from their own terminal.
+
+## Dialogue 21
+
+**User:** i would say phase 2 is complete. lets move onto phase 3. Please implement it and i can review how it looks
+
+**Claude:** Implemented Phase 3 (practice configuration) and checked off all its items in `documentation/implementation-list.md`. Lint, build and 13 tests pass. Run `npm run dev` and open Start Practice to review.
+
+What was added:
+
+- `src/components/common/ChoiceCard.tsx` / `.css`: large tappable option built on a native checkbox or radio, with a visible checkmark when selected.
+- `src/components/practice/OperationSelector.tsx`: pick one or more of the four operations, plus a "Select all (mixed)" / "Clear all" button.
+- `src/components/practice/DifficultySelector.tsx`: four levels (Beginner, Easy, Intermediate, Advanced) with short descriptions; one at a time.
+- `src/components/practice/SessionLengthSelector.tsx`: 5, 10, 20 questions or continuous; default is 10.
+- `src/components/practice/SetupGroup.css`: shared white card styling for the three groups.
+- `src/pages/PracticeSetupPage.tsx` / `.css`: assembles the selectors with a Start Session button, disabled with a friendly message when no operation is selected. Defaults: addition, Level 1, 10 questions.
+- `src/pages/PracticePage.tsx`: receives the chosen settings and shows them (placeholder until questions are built); without settings it links back to setup.
+- `src/utils/practiceConfig.ts`: option lists and defaults. `PracticeConfig` type added to `src/types/session.ts`.
+- `src/pages/PracticeSetupPage.test.tsx`: tests for defaults, multi-select, select-all, validation and passing settings along. Existing route tests updated for the new setup heading.
+
+Review mode (regular vs. similar questions) is in the spec but not in the Phase 3 list, so it is not included yet.

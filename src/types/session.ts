@@ -28,3 +28,10 @@ export interface PracticeSession {
   correct: number
   incorrect: number
 }
+
+/** Settings chosen on the practice setup page and handed to a practice session. */
+export interface PracticeConfig {
+  operations: MathOperation[]
+  difficulty: DifficultyLevel
+  sessionLength: SessionLength
+}
