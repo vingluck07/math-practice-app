@@ -16,7 +16,7 @@
   --font-base: 1.25rem;
   --font-title: clamp(2rem, 6vw, 3.25rem);
 
-  font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Fredoka Variable', 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--color-text);
@@ -39,6 +39,7 @@ body {
 h1,
 h2 {
   line-height: 1.15;
+  font-weight: 700;
   margin: 0 0 0.5em;
 }
 

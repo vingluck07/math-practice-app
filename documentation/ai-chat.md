@@ -119,3 +119,9 @@ Files added or changed:
 **User:** it is not willing to do it because the remote repository contains work i don't have locally. I suspect this is because i included a README
 
 **Claude:** Confirmed: GitHub's auto-created initial commit isn't in the local history. Gave two options: merge with `git pull origin main --allow-unrelated-histories --no-rebase` (keep our `README.md` with `git checkout --ours`, then commit and push), or `git push -u --force origin main` to overwrite the remote if it only holds the generated README.
+
+## Dialogue 17
+
+**User:** that worked. lets go back to phase 2 now that git is set up. i like the style of the page but i want the font to be more playful. can you make those changes
+
+**Claude:** Switched the app font to Fredoka, a rounded, playful typeface. It is installed as the npm package `@fontsource-variable/fredoka` and bundled with the app, so it makes no external requests (consistent with the spec's privacy section). Changed `src/main.tsx`, `src/index.css` and `src/components/layout/Header.css`; lint, build and tests pass. The user needs to run `npm install` to get the new package.
