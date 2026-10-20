@@ -64,9 +64,8 @@ describe('PracticeSetupPage', () => {
     await user.click(screen.getByRole('radio', { name: /20 questions/i }))
     await user.click(screen.getByRole('button', { name: 'Start Session' }))
 
-    expect(screen.getByRole('heading', { name: 'Practice' })).toBeInTheDocument()
-    expect(screen.getByText(/Practicing: Addition, Multiplication/)).toBeInTheDocument()
-    expect(screen.getByText(/Level: 3 \(Intermediate\)/)).toBeInTheDocument()
-    expect(screen.getByText(/Length: 20 questions/)).toBeInTheDocument()
+    expect(screen.getByText('Question 1 of 20')).toBeInTheDocument()
+    // The question uses one of the chosen operations (addition or multiplication).
+    expect(screen.getByRole('heading', { name: /plus|times/ })).toBeInTheDocument()
   })
 })

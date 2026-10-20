@@ -37,3 +37,29 @@ export function formatQuestionText(
 ): string {
   return `${firstOperand} ${OPERATION_SYMBOLS[operation]} ${secondOperand} = ?`
 }
+
+const OPERATION_WORDS: Record<MathOperation, string> = {
+  addition: 'plus',
+  subtraction: 'minus',
+  multiplication: 'times',
+  division: 'divided by',
+}
+
+/** The problem in words for screen readers, e.g. "7 times 8". */
+export function spokenQuestionText(
+  operation: MathOperation,
+  firstOperand: number,
+  secondOperand: number,
+): string {
+  return `${firstOperand} ${OPERATION_WORDS[operation]} ${secondOperand}`
+}
+
+/** The solved problem shown on the back of a card, e.g. "7 × 8 = 56". */
+export function formatAnswerText(
+  operation: MathOperation,
+  firstOperand: number,
+  secondOperand: number,
+  answer: number,
+): string {
+  return `${firstOperand} ${OPERATION_SYMBOLS[operation]} ${secondOperand} = ${answer}`
+}

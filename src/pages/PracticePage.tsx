@@ -1,11 +1,59 @@
+import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useSettings } from '../app/settingsContext'
 import { ButtonLink } from '../components/common/Button'
+import QuestionCard from '../components/practice/QuestionCard'
+import { generateRandomQuestion } from '../services/questionGenerator'
 import type { PracticeConfig } from '../types/session'
-import { DIFFICULTY_OPTIONS, OPERATION_OPTIONS } from '../utils/practiceConfig'
 
 function readConfig(state: unknown): PracticeConfig | null {
   const config = (state as { config?: PracticeConfig } | null)?.config
   return config && config.operations?.length > 0 ? config : null
+}
+
+/**
+ * Card preview: shows real questions one at a time. Recording results, session
+ * progress and the summary arrive with the practice-session work (Phase 7).
+ */
+function CardPreview({ config }: { config: PracticeConfig }) {
+  const { settings } = useSettings()
+  const [questionNumber, setQuestionNumber] = useState(1)
+  const [question, setQuestion] = useState(() =>
+    generateRandomQuestion(config.operations, config.difficulty),
+  )
+  const finished = config.sessionLength !== 'continuous' && questionNumber > config.sessionLength
+
+  function handleNext() {
+    setQuestionNumber((n) => n + 1)
+    setQuestion(generateRandomQuestion(config.operations, config.difficulty))
+  }
+
+  if (finished) {
+    return (
+      <section>
+        <h1>That&apos;s all the questions!</h1>
+        <p>The session summary is coming soon.</p>
+        <ButtonLink to="/practice/setup" variant="accent">
+          Back to Practice Setup
+        </ButtonLink>
+      </section>
+    )
+  }
+
+  return (
+    <section>
+      <h1 className="sr-only">Practice</h1>
+      <QuestionCard
+        key={question.id}
+        question={question}
+        questionNumber={questionNumber}
+        total={config.sessionLength}
+        animate={settings.cardAnimationEnabled}
+        onResult={() => {}} // Recording results arrives in Phase 7.
+        onNext={handleNext}
+      />
+    </section>
+  )
 }
 
 export default function PracticePage() {
@@ -23,27 +71,5 @@ export default function PracticePage() {
     )
   }
 
-  const operations = OPERATION_OPTIONS.filter((o) => config.operations.includes(o.value))
-    .map((o) => o.label)
-    .join(', ')
-  const difficulty = DIFFICULTY_OPTIONS.find((d) => d.value === config.difficulty)
-  const length =
-    config.sessionLength === 'continuous' ? 'Continuous' : `${config.sessionLength} questions`
-
-  return (
-    <section>
-      <h1>Practice</h1>
-      <p>Your session is ready. Questions are coming soon!</p>
-      <ul aria-label="Session settings">
-        <li>Practicing: {operations}</li>
-        <li>
-          Level: {difficulty?.value} ({difficulty?.label})
-        </li>
-        <li>Length: {length}</li>
-      </ul>
-      <ButtonLink to="/practice/setup" variant="secondary">
-        Change Settings
-      </ButtonLink>
-    </section>
-  )
+  return <CardPreview config={config} />
 }

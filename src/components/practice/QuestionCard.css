@@ -1,0 +1,114 @@
+.flip {
+  perspective: 1200px;
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.flip__inner {
+  display: grid;
+  transform-style: preserve-3d;
+}
+
+.flip--animated .flip__inner {
+  transition: transform 0.6s ease;
+}
+
+.flip--animated.flip--flipped .flip__inner {
+  transform: rotateY(180deg);
+}
+
+/* Both faces share one grid cell, so they stay perfectly aligned. */
+.flip__face {
+  grid-area: 1 / 1;
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Pre-rotated so the text reads correctly (not mirrored) once the card is flipped. */
+.flip--animated .flip__face--back {
+  transform: rotateY(180deg);
+}
+
+/* No animation: show one face at a time. */
+.flip--static .flip__face[inert] {
+  display: none;
+}
+
+.card-face__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1rem, 4vw, 2rem);
+  text-align: center;
+}
+
+.card__progress {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.card__question {
+  margin: 0;
+  font-size: clamp(2.75rem, 12vw, 4.75rem);
+  letter-spacing: 0.02em;
+}
+
+.card__question:focus {
+  outline: none;
+}
+
+.card__choices {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.card__hint {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.card__your-answer {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.card__feedback {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: #eef4ff;
+  font-size: 1.3rem;
+}
+
+.card__results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (min-width: 520px) {
+  .card__choices {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .card__results {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip--animated .flip__inner {
+    transition: none;
+  }
+}

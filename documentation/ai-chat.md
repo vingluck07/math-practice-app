@@ -222,3 +222,32 @@ Files added or changed:
 - `src/services/questionGenerator.ts`: now fills in and validates the four choices.
 - `src/utils/validation.ts`: added choice checks (exactly four, unique, whole numbers, correct answer present once); problem-only checks are now `getProblemErrors`.
 - Tests: `src/services/distractors.test.ts` (new), plus updated generator and validation tests.
+
+## Dialogue 28
+
+**User:** looks good, please implement phase 6 now
+
+**Claude:** Implemented Phase 6 (question card) and checked off all its items in `documentation/implementation-list.md`. Lint, build and 134 tests pass, and I checked the flip in a real browser at desktop and phone widths (no mirrored text, front and back aligned). No commit and no new npm packages. A temporary bundle I staged for the visual check was deleted from the project folder.
+
+To make the card reviewable, the practice page now shows real questions one at a time from the setup choices. It does not yet record results, track progress or show a summary; that is Phase 7.
+
+Files added or changed:
+
+- `src/components/practice/AnswerChoice.tsx` / `.css`: answer button with selected, hover, focus and locked states and an accessible label.
+- `src/components/practice/CardFront.tsx`: question number, large math text, four choices, Flip Card button (disabled until an answer is picked).
+- `src/components/practice/CardBack.tsx`: solved problem, correct and selected answers, **I Got It Right** / **I Got It Wrong** (only one can be used per attempt).
+- `src/components/practice/QuestionCard.tsx` / `.css`: holds the selection and flip state; CSS flip animation with both sides aligned; keys 1–4 select answers; focus moves to the new content; the hidden side is made inert so it cannot be tabbed to.
+- `src/app/AppProvider.tsx`, `settingsContext.ts`, `src/utils/defaultSettings.ts`: in-memory settings (saving comes in Phase 9).
+- `src/pages/SettingsPage.tsx`: a "Card animation" switch; turning it off swaps sides instantly. `prefers-reduced-motion` is also respected.
+- `src/pages/PracticePage.tsx`: shows the card with real questions; the old settings summary was removed.
+- `src/utils/math.ts`: spoken question text for screen readers and the solved-problem text.
+- `src/index.css`: `.sr-only` helper.
+- Tests for the card, answer choice, practice page flow, and the animation setting; the setup-page test was updated.
+
+## Dialogue 29
+
+**User:** It is supposed to tell you the correct answer after you decide if you got it right or wrong. The right or wrong is supposed to be a confidence check
+
+**Claude:** Reworked the back of the card into two steps. Step 1 is a confidence check: it shows the question, "Your answer: …" and "How do you think you did?" with **I Got It Right** / **I Got It Wrong**, and does not reveal the correct answer. Step 2, after the student chooses, reveals the solved problem and correct answer, shows "You said: …" and a short message, and adds a **Next Question** button (the card no longer jumps ahead on its own). Lint, build and 136 tests pass. No commit and no new packages.
+
+Changed files: `src/components/practice/CardBack.tsx`, `QuestionCard.tsx` (new `onNext` prop), `src/pages/PracticePage.tsx` (advances on Next Question), and the card and practice-page tests. For Phase 7, the confidence check is the point where the result will be recorded.
