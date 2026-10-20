@@ -321,3 +321,25 @@ Changed: `src/services/practiceSession.ts` (totals counted from the picked answe
 **User:** those lines are talking about the "how do you think you did" feature where they can self report. It does not affect the session summary yet
 
 **Claude:** Agreed. Those spec lines describe the confidence check, which is still saved on each attempt (`selfReportedCorrect`) but does not feed the summary, so the spec does not need changing. Withdrew the earlier suggestion to update it. No code changes.
+
+## Dialogue 37
+
+**User:** looks good now. please move onto phase 9
+
+**Claude:** Implemented Phase 9 (local data storage) and checked off all its items in `documentation/implementation-list.md`. Lint, build and 225 tests pass. No commit and no new npm packages. This phase has little to see visually; the only new screen element is a friendly warning that appears if the browser cannot save.
+
+What it does: settings are saved when changed and loaded at start-up (damaged fields fall back to defaults one by one); every attempt is saved as soon as the confidence check is made (selected answer, self-reported result, operation, difficulty, session ID, timestamp); the session is saved with its running totals and again with its completion time. Storage keeps the newest 100 sessions and 5,000 attempts, and if the browser reports it is full it drops the oldest 20% once and retries. A schema version (`mathPractice.version`) is stamped on first start, with a migration structure ready for future changes; data from a newer version is left alone, and clearing data only ever removes this app's own keys. If storage is blocked or full, practice continues and a warning ("We can't save your progress in this browser right now…") appears with an OK button.
+
+To check persistence yourself: finish a few questions, refresh the page, and look under DevTools > Application > Local Storage for the `mathPractice.*` keys.
+
+Files added or changed:
+
+- `src/services/storageService.ts`: safe `localStorage` wrapper (read, write, remove, clear only this app's keys).
+- `src/services/migrations.ts`: schema version and migration structure.
+- `src/services/settingsStorage.ts`, `practiceStorage.ts`: save and load settings, sessions and attempts.
+- `src/utils/storageValidation.ts`: checks loaded data and repairs settings field by field.
+- `src/app/AppProvider.tsx`, `storageStatusContext.ts`: load and save settings at start-up and on change; track whether saving works.
+- `src/components/common/StorageWarning.tsx` / `.css`, `src/components/layout/Layout.tsx`: the warning banner.
+- `src/hooks/usePracticeSession.ts`: saves progress as attempts are recorded and when the session ends.
+- `src/test/setup.ts`, `storageHelpers.ts`: tests start with empty storage; helpers simulate blocked or full storage.
+- Tests for the storage service, migrations, settings, practice data and end-to-end persistence.

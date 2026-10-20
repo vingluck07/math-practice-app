@@ -1,0 +1,24 @@
+.storage-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  border: 3px solid var(--color-secondary);
+  border-radius: var(--radius);
+  background: #ffffff;
+  text-align: center;
+}
+
+.storage-warning p {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.storage-warning .btn {
+  min-height: 2.75rem;
+  padding: 0.25rem 1.25rem;
+  font-size: 1.1rem;
+}

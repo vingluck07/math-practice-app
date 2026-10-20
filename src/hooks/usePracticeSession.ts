@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { useStorageStatus } from '../app/storageStatusContext'
 import { generateNextQuestion, generateRandomQuestion } from '../services/questionGenerator'
+import { saveProgress } from '../services/practiceStorage'
 import {
   advance,
   endSession,
   hasRecordedCurrentQuestion,
   isLastQuestion,
-  recordResult,
+  recordResult as applyResult,
   startSession,
 } from '../services/practiceSession'
 import type { PracticeConfig, PracticeSessionState } from '../types/session'
@@ -22,6 +24,19 @@ function createSession(config: PracticeConfig): PracticeSessionState | null {
 export function usePracticeSession(config: PracticeConfig) {
   const [state, setState] = useState(() => createSession(config))
   const [nextFailed, setNextFailed] = useState(false)
+  const { reportStorageProblem } = useStorageStatus()
+
+  // Always holds the latest state, so two quick events can never both act on stale data.
+  const latest = useRef(state)
+
+  /** Saves what changed (a failure shows a friendly warning, but practice carries on). */
+  function commit(next: PracticeSessionState) {
+    const previous = latest.current
+    if (!previous || next === previous) return
+    if (!saveProgress(previous, next).ok) reportStorageProblem()
+    latest.current = next
+    setState(next)
+  }
 
   return {
     state,
@@ -30,25 +45,26 @@ export function usePracticeSession(config: PracticeConfig) {
     isLastQuestion: state !== null && isLastQuestion(state),
     hasRecordedCurrent: state !== null && hasRecordedCurrentQuestion(state),
 
-    recordResult(gotItRight: boolean, selectedAnswer: number) {
-      setState((s) => (s ? recordResult(s, gotItRight, selectedAnswer) : s))
+    recordResult(feltConfident: boolean, selectedAnswer: number) {
+      if (latest.current) commit(applyResult(latest.current, feltConfident, selectedAnswer))
     },
 
     /** Shows the next question, or ends the session after the last one. */
     next() {
-      if (!state) return
+      const current = latest.current
+      if (!current) return
       try {
-        const nextQuestion = isLastQuestion(state)
+        const nextQuestion = isLastQuestion(current)
           ? null
-          : generateNextQuestion(config.operations, config.difficulty, state.currentQuestion)
-        setState(advance(state, nextQuestion))
+          : generateNextQuestion(config.operations, config.difficulty, current.currentQuestion)
+        commit(advance(current, nextQuestion))
       } catch {
         setNextFailed(true)
       }
     },
 
     end() {
-      setState((s) => (s ? endSession(s) : s))
+      if (latest.current) commit(endSession(latest.current))
     },
   }
 }
