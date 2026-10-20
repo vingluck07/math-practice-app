@@ -1,6 +1,8 @@
 import type { PracticeAttempt, PracticeSession, PracticeSessionState } from '../types/session'
-import { isStoredAttempt, isStoredSession } from '../utils/storageValidation'
-import { STORAGE_KEYS, readItem, writeItem, type WriteResult } from './storageService'
+import type { AppStatistics } from '../types/statistics'
+import { isStoredAttempt, isStoredSession, isStoredStatistics } from '../utils/storageValidation'
+import { addAttemptToStatistics, buildStatistics } from './statisticsService'
+import { STORAGE_KEYS, readItem, removeItem, writeItem, type WriteResult } from './storageService'
 
 /** Older records beyond these limits are dropped so storage never fills up. */
 export const MAX_STORED_SESSIONS = 100
@@ -53,6 +55,43 @@ export function loadAttempts(): PracticeAttempt[] {
 }
 
 /**
+ * Loads the running totals. If they are missing or damaged, they are rebuilt
+ * from the saved attempts (nothing is written until the next attempt).
+ */
+export function loadStatistics(): AppStatistics {
+  const stored = readItem(STORAGE_KEYS.statistics, isStoredStatistics)
+  return stored.ok ? stored.value : buildStatistics(loadAttempts())
+}
+
+/**
+ * Counts one newly saved attempt in the running totals. If the totals are
+ * missing or damaged, they are rebuilt from the saved attempts instead (which
+ * already include this one), so nothing is ever counted twice.
+ */
+function recordAttemptStatistics(attempt: PracticeAttempt): WriteResult {
+  const stored = readItem(STORAGE_KEYS.statistics, isStoredStatistics)
+  const next = stored.ok
+    ? addAttemptToStatistics(stored.value, attempt)
+    : buildStatistics(loadAttempts())
+  return writeItem(STORAGE_KEYS.statistics, next)
+}
+
+/**
+ * Erases practice history: attempts, sessions, mistake patterns and the running
+ * totals. Settings are kept. Returns false if anything could not be erased.
+ */
+export function clearPracticeHistory(): boolean {
+  return [
+    STORAGE_KEYS.attempts,
+    STORAGE_KEYS.sessions,
+    STORAGE_KEYS.mistakePatterns,
+    STORAGE_KEYS.statistics,
+  ]
+    .map(removeItem)
+    .every(Boolean)
+}
+
+/**
  * Saves whatever changed between two states of a session: a newly recorded
  * attempt, and the session's updated totals or completion time.
  */
@@ -62,7 +101,9 @@ export function saveProgress(
 ): WriteResult {
   let result: WriteResult = { ok: true }
   if (next.attempts.length > previous.attempts.length) {
-    result = saveAttempt(next.attempts[next.attempts.length - 1])
+    const attempt = next.attempts[next.attempts.length - 1]
+    result = saveAttempt(attempt)
+    if (result.ok) result = recordAttemptStatistics(attempt)
   }
   if (next.session !== previous.session) {
     const sessionResult = saveSession(next.session)

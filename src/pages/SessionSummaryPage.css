@@ -12,31 +12,8 @@
 }
 
 .summary__stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
   max-width: 40rem;
   margin: 0 auto 1.5rem;
-}
-
-.stat {
-  padding: 1rem 0.5rem;
-  border: 3px solid var(--color-border);
-  border-radius: var(--radius);
-  background: #fffaf0;
-}
-
-.stat__label {
-  color: var(--color-muted);
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.stat__value {
-  margin: 0;
-  font-size: clamp(2rem, 8vw, 3rem);
-  font-weight: 700;
-  line-height: 1.2;
 }
 
 .summary__details {
@@ -66,12 +43,6 @@
   margin: 1rem 0 0;
   color: var(--color-muted);
   font-size: 1rem;
-}
-
-@media (min-width: 700px) {
-  .summary__stats {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
 
 @media (min-width: 900px) {

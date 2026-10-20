@@ -1,0 +1,17 @@
+.stats-section {
+  margin-bottom: 1.5rem;
+  padding: clamp(1rem, 4vw, 1.75rem);
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.stats-section h2 {
+  margin-bottom: 0.75rem;
+}
+
+.stats-reset {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1rem;
+}

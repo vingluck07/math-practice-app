@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { makeAttempt as makeTestAttempt, makeSession as makeTestSession } from '../test/factories'
 import { fillStorage } from '../test/storageHelpers'
 import type { PracticeAttempt, PracticeSession } from '../types/session'
 import {
   MAX_STORED_ATTEMPTS,
+  clearPracticeHistory,
+  loadStatistics,
   MAX_STORED_SESSIONS,
   loadAttempts,
   loadSessions,
@@ -11,6 +14,7 @@ import {
   saveSession,
 } from './practiceStorage'
 import { startSession, recordResult, endSession } from './practiceSession'
+import { createEmptyStatistics } from './statisticsService'
 import { STORAGE_KEYS } from './storageService'
 
 afterEach(() => vi.restoreAllMocks())
@@ -204,5 +208,89 @@ describe('saveProgress', () => {
     saveProgress(start, start)
     expect(loadSessions()).toEqual([])
     expect(loadAttempts()).toEqual([])
+  })
+})
+
+describe('statistics storage', () => {
+  const config = {
+    operations: ['multiplication' as const],
+    difficulty: 2 as const,
+    sessionLength: 5,
+  }
+  const question = {
+    id: 'q1',
+    operation: 'multiplication' as const,
+    firstOperand: 7,
+    secondOperand: 8,
+    displayText: '7 × 8 = ?',
+    correctAnswer: 56,
+    choices: [48, 54, 56, 64],
+    difficulty: 2 as const,
+    source: 'regular' as const,
+  }
+
+  it('is empty when nothing has been saved', () => {
+    expect(loadStatistics()).toMatchObject({ attempted: 0, correct: 0, incorrect: 0 })
+  })
+
+  it('counts each recorded attempt once, by the picked answer', () => {
+    const start = startSession(config, question)
+    const right = recordResult(start, false, 56)
+    saveProgress(start, right)
+    const wrong = recordResult({ ...right, currentQuestion: { ...question, id: 'q2' } }, true, 48)
+    saveProgress({ ...right, currentQuestion: { ...question, id: 'q2' } }, wrong)
+
+    const stats = loadStatistics()
+    expect(stats).toMatchObject({ attempted: 2, correct: 1, incorrect: 1 })
+    expect(stats.byOperation.multiplication).toMatchObject({ attempted: 2, correct: 1 })
+    expect(stats.byDifficulty[2]).toMatchObject({ attempted: 2, incorrect: 1 })
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.statistics) ?? '{}').attempted).toBe(2)
+  })
+
+  it('rebuilds from saved attempts when the totals are missing, without double counting', () => {
+    saveAttempt(makeTestAttempt({ correct: true }))
+    saveAttempt(makeTestAttempt({ correct: false }))
+    expect(loadStatistics()).toMatchObject({ attempted: 2, correct: 1, incorrect: 1 })
+
+    const start = startSession(config, question)
+    saveProgress(start, recordResult(start, true, 56))
+    expect(loadStatistics()).toMatchObject({ attempted: 3, correct: 2, incorrect: 1 })
+  })
+
+  it('rebuilds from saved attempts when the totals are damaged', () => {
+    saveAttempt(makeTestAttempt({ correct: true }))
+    localStorage.setItem(STORAGE_KEYS.statistics, JSON.stringify({ attempted: 'lots' }))
+    expect(loadStatistics()).toMatchObject({ attempted: 1, correct: 1 })
+    localStorage.setItem(STORAGE_KEYS.statistics, '{broken')
+    expect(loadStatistics()).toMatchObject({ attempted: 1, correct: 1 })
+  })
+
+  it('rejects totals that do not add up', () => {
+    saveAttempt(makeTestAttempt({ correct: true }))
+    const lying = createEmptyStatistics()
+    lying.attempted = 50
+    localStorage.setItem(STORAGE_KEYS.statistics, JSON.stringify(lying))
+    expect(loadStatistics().attempted).toBe(1)
+  })
+})
+
+describe('clearPracticeHistory', () => {
+  it('erases history but keeps settings and other apps’ data', () => {
+    saveAttempt(makeTestAttempt())
+    saveSession(makeTestSession())
+    localStorage.setItem(STORAGE_KEYS.statistics, JSON.stringify(createEmptyStatistics()))
+    localStorage.setItem(STORAGE_KEYS.mistakePatterns, '[]')
+    localStorage.setItem(STORAGE_KEYS.settings, '{"cardAnimationEnabled":false}')
+    localStorage.setItem(STORAGE_KEYS.version, '{"version":1}')
+    localStorage.setItem('someOtherApp.theme', 'dark')
+
+    expect(clearPracticeHistory()).toBe(true)
+    for (const key of ['attempts', 'sessions', 'statistics', 'mistakePatterns'] as const) {
+      expect(localStorage.getItem(STORAGE_KEYS[key])).toBeNull()
+    }
+    expect(localStorage.getItem(STORAGE_KEYS.settings)).not.toBeNull()
+    expect(localStorage.getItem(STORAGE_KEYS.version)).not.toBeNull()
+    expect(localStorage.getItem('someOtherApp.theme')).toBe('dark')
+    expect(loadStatistics().attempted).toBe(0)
   })
 })

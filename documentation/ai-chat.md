@@ -343,3 +343,21 @@ Files added or changed:
 - `src/hooks/usePracticeSession.ts`: saves progress as attempts are recorded and when the session ends.
 - `src/test/setup.ts`, `storageHelpers.ts`: tests start with empty storage; helpers simulate blocked or full storage.
 - Tests for the storage service, migrations, settings, practice data and end-to-end persistence.
+
+## Dialogue 38
+
+**User:** looks good. move onto phase 10
+
+**Claude:** Implemented Phase 10 (Statistics) and checked off all its items in `documentation/implementation-list.md`. Lint, build and 253 tests pass. No commit and no new npm packages.
+
+What it does: the Statistics page shows overall totals (questions, correct, incorrect, accuracy), a card per operation, a card per level, and the 10 most recent sessions. Results are based on the answer picked, not the confidence check. With no practice yet, it shows a friendly empty state with a Start Practice link. Reset Statistics asks for confirmation, then erases all practice history and statistics; settings are kept. Statistics update with every saved attempt and are rebuilt from saved attempts if the stored totals are missing or damaged.
+
+Files added or changed:
+
+- `src/services/statisticsService.ts`: totals, per-operation and per-level counts, accuracy (no divide-by-zero), recent session summaries.
+- `src/services/practiceStorage.ts`, `src/utils/storageValidation.ts`: save, load, validate and rebuild statistics; `clearPracticeHistory` for reset.
+- `src/hooks/useStatistics.ts`: gives the page its data and a reset action.
+- `src/components/common/StatTile.tsx`, `EmptyState.tsx` (+ CSS): shared tile and empty-state pieces (the summary page now uses `StatTile`).
+- `src/components/statistics/`: overview, breakdown card, operation cards, level cards, recent sessions.
+- `src/pages/StatisticsPage.tsx` / `.css`: the page with the reset confirmation.
+- Tests: statistics calculations, storage, the page, and an end-to-end check after practicing.

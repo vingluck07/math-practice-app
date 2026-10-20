@@ -1,0 +1,35 @@
+.sessions {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.session {
+  padding: 0.75rem 1.25rem;
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fffaf0;
+}
+
+.session__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  font-weight: 700;
+}
+
+.session__accuracy {
+  color: var(--color-primary);
+}
+
+.session__what,
+.session__counts {
+  margin: 0.25rem 0 0;
+}
+
+.session__counts {
+  color: var(--color-muted);
+}

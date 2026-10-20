@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { Button, ButtonLink } from '../components/common/Button'
 import Panel from '../components/common/Panel'
+import StatTile from '../components/common/StatTile'
 import type { PracticeAttempt, PracticeConfig, PracticeSession } from '../types/session'
 import { calculateAccuracy, encouragement } from '../utils/accuracy'
 import { DIFFICULTY_OPTIONS, OPERATION_OPTIONS } from '../utils/practiceConfig'
@@ -9,15 +10,6 @@ import './SessionSummaryPage.css'
 interface SummaryState {
   session?: PracticeSession
   attempts?: PracticeAttempt[]
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="stat">
-      <dt className="stat__label">{label}</dt>
-      <dd className="stat__value">{value}</dd>
-    </div>
-  )
 }
 
 export default function SessionSummaryPage() {
@@ -57,11 +49,11 @@ export default function SessionSummaryPage() {
       <h1>Session Summary</h1>
       <p className="summary__message">{encouragement(accuracy)}</p>
 
-      <dl className="summary__stats" aria-label="Results">
-        <Stat label="Questions" value={session.attempted} />
-        <Stat label="Correct" value={session.correct} />
-        <Stat label="Incorrect" value={session.incorrect} />
-        <Stat label="Accuracy" value={accuracy === null ? '—' : `${accuracy}%`} />
+      <dl className="stat-grid summary__stats" aria-label="Results">
+        <StatTile label="Questions" value={session.attempted} />
+        <StatTile label="Correct" value={session.correct} />
+        <StatTile label="Incorrect" value={session.incorrect} />
+        <StatTile label="Accuracy" value={accuracy === null ? '—' : `${accuracy}%`} />
       </dl>
 
       <dl className="summary__details" aria-label="Session details">

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -107,6 +107,26 @@ describe('saving practice results', () => {
     await answerOne(user, 'Next Question')
     expect(loadAttempts()).toHaveLength(2)
     expect(loadSessions()).toHaveLength(2)
+  })
+})
+
+describe('statistics after practicing', () => {
+  it('appear on the statistics page once questions have been answered', async () => {
+    const user = userEvent.setup()
+    renderApp('/practice/session', { operations: ['division'], difficulty: 2, sessionLength: 5 })
+    await answerOne(user, 'Next Question', true)
+    await answerOne(user, 'Next Question', true)
+    await answerOne(user, 'Next Question', false)
+    await user.click(screen.getByRole('link', { name: 'Statistics' }))
+
+    const tile = (label: string) =>
+      within(screen.getByLabelText('Overall statistics')).getByText(label, { selector: 'dt' })
+        .parentElement as HTMLElement
+    expect(tile('Questions')).toHaveTextContent('3')
+    expect(tile('Correct')).toHaveTextContent('2')
+    expect(tile('Incorrect')).toHaveTextContent('1')
+    expect(tile('Accuracy')).toHaveTextContent('67%')
+    expect(screen.getByRole('list', { name: 'Recent sessions' })).toHaveTextContent('Division')
   })
 })
 

@@ -1,7 +1,8 @@
 import type { AppSettings } from '../types/settings'
+import type { AppStatistics } from '../types/statistics'
 import type { PracticeAttempt, PracticeSession } from '../types/session'
 import { DEFAULT_SETTINGS } from './defaultSettings'
-import { isDifficultyLevel, isMathOperation } from './validation'
+import { DIFFICULTY_LEVELS, OPERATIONS, isDifficultyLevel, isMathOperation } from './validation'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -50,6 +51,28 @@ export function isStoredSession(value: unknown): value is PracticeSession {
     isCount(value.attempted) &&
     isCount(value.correct) &&
     isCount(value.incorrect)
+  )
+}
+
+function isCounts(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isCount(value.attempted) &&
+    isCount(value.correct) &&
+    isCount(value.incorrect) &&
+    value.attempted === (value.correct as number) + (value.incorrect as number)
+  )
+}
+
+/** Checks saved statistics: every group present, counts whole numbers, totals adding up. */
+export function isStoredStatistics(value: unknown): value is AppStatistics {
+  if (!isRecord(value) || !isCounts(value)) return false
+  const { byOperation, byDifficulty } = value
+  return (
+    isRecord(byOperation) &&
+    isRecord(byDifficulty) &&
+    OPERATIONS.every((o) => isCounts(byOperation[o])) &&
+    DIFFICULTY_LEVELS.every((d) => isCounts(byDifficulty[d]))
   )
 }
 
