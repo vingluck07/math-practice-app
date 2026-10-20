@@ -163,3 +163,9 @@ What was added:
 - `src/pages/PracticeSetupPage.test.tsx`: tests for defaults, multi-select, select-all, validation and passing settings along. Existing route tests updated for the new setup heading.
 
 Review mode (regular vs. similar questions) is in the spec but not in the Phase 3 list, so it is not included yet.
+
+## Dialogue 22
+
+**User:** looks good. i will do a git push and move onto phase 4
+
+**Claude:** Acknowledged. Phase 3 is approved and committed locally; waiting for the user's go-ahead on Phase 4.
