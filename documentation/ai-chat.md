@@ -285,3 +285,39 @@ Files added or changed:
 **User:** the session summary looks very bland. can you make it have the same format as the homepage where the text is inside a floating white box
 
 **Claude:** Moved the floating white box styling into a shared `Panel` component (`src/components/common/Panel.tsx` / `.css`) and used it for both the home page and the session summary page, so they match. The summary now has a centered heading, larger result text, and two buttons: **Practice Again** and **Return Home**. The home page looks the same as before. Lint, build and 163 tests pass. No commit, no new packages. Changed: `HomePage.tsx` / `.css`, `SessionSummaryPage.tsx` / `.css`.
+
+## Dialogue 33
+
+**User:** looks good, please move on to implementing phase 8
+
+**Claude:** Implemented Phase 8 (session summary) and checked off all its items in `documentation/implementation-list.md`. Lint, build and 175 tests pass, and I checked the page in a browser at desktop and phone widths. No commit and no new npm packages. A temporary bundle staged for the visual check was removed from the project folder.
+
+Completion detection (compare attempts with the session length, stop generating questions, save the completion time, go to the summary) was already built in Phase 7, so item 32 is checked off based on that and its existing tests.
+
+What the summary shows: an encouraging message, four tiles (Questions, Got it right, Got it wrong, Accuracy), the operations practiced, the level with its name, and the number of mistake-review questions (0 until mistake review exists). Buttons: **Practice Again** (same settings, starts immediately), **Practice Mistakes** (visible but disabled, with a "coming soon" note, because mistake review is not built yet), **Change Settings**, **View Statistics**, **Return Home**. Opening the page without a session shows a friendly message.
+
+Files added or changed:
+
+- `src/pages/SessionSummaryPage.tsx` / `.css`: the new summary layout and actions.
+- `src/utils/accuracy.ts`: accuracy percentage and encouraging messages.
+- Tests: `SessionSummaryPage.test.tsx`, `accuracy.test.ts`, and updated practice-page tests.
+
+## Dialogue 34
+
+**User:** for the session summary, rename the "got it right" and "got it wrong" boxes to "correct" and "incorrect" respectively. The boxes at the end are not showing the correct stats. correct, incorrect, and accuracy should be calculated based off the answers to the questions. It seems right now they are based off the responses to the "how do you think you did" question
+
+**Claude:** Renamed the summary boxes to **Correct** and **Incorrect**. Correct, incorrect and accuracy now come from the answer the student actually picked (right if it matches the correct answer); the "how do you think you did?" response is still saved on each attempt (`selfReportedCorrect`) but no longer affects those numbers. Lint, build and 178 tests pass (new tests cover right-but-unsure and wrong-but-confident cases). No commit, no new packages.
+
+Changed: `src/services/practiceSession.ts` (totals counted from the picked answer), `src/pages/SessionSummaryPage.tsx` (labels), `src/utils/accuracy.ts` (`isAttemptCorrect` helper for later phases such as statistics), `src/types/session.ts` (comments), and the related tests. Note: `software-specification.md` still describes correct/incorrect as self-reported; it may be worth updating.
+
+## Dialogue 35
+
+**User:** which line does software-specficiation denote that
+
+**Claude:** Listed the lines in `software-specification.md` that describe correct/incorrect as self-reported: 14, 211, 238–240 (the "Self-Reported Result" section), 260, 671 (`selfReportedCorrect`), 941, 1172, 1223 and 1243. The clearest statements are 240 and 1243.
+
+## Dialogue 36
+
+**User:** those lines are talking about the "how do you think you did" feature where they can self report. It does not affect the session summary yet
+
+**Claude:** Agreed. Those spec lines describe the confidence check, which is still saved on each attempt (`selfReportedCorrect`) but does not feed the summary, so the spec does not need changing. Withdrew the earlier suggestion to update it. No code changes.

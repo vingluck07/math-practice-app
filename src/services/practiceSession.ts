@@ -44,12 +44,14 @@ export function isLastQuestion(state: PracticeSessionState): boolean {
 }
 
 /**
- * Records the student's confidence check for the current question. Does nothing
- * if the session is over or this question was already recorded.
+ * Records one answered question. The session's correct/incorrect totals come
+ * from the answer the student actually picked; `feltConfident` is their
+ * "how do you think you did?" response and is stored separately on the attempt.
+ * Does nothing if the session is over or this question was already recorded.
  */
 export function recordResult(
   state: PracticeSessionState,
-  gotItRight: boolean,
+  feltConfident: boolean,
   selectedAnswer: number,
   now: Date = new Date(),
 ): PracticeSessionState {
@@ -64,20 +66,21 @@ export function recordResult(
     secondOperand: q.secondOperand,
     correctAnswer: q.correctAnswer,
     selectedAnswer,
-    selfReportedCorrect: gotItRight,
+    selfReportedCorrect: feltConfident,
     difficulty: q.difficulty,
     source: q.source,
     attemptedAt: now.toISOString(),
     sessionId: session.id,
   }
+  const answeredCorrectly = selectedAnswer === q.correctAnswer
   return {
     ...state,
     attempts: [...state.attempts, attempt],
     session: {
       ...session,
       attempted: session.attempted + 1,
-      correct: session.correct + (gotItRight ? 1 : 0),
-      incorrect: session.incorrect + (gotItRight ? 0 : 1),
+      correct: session.correct + (answeredCorrectly ? 1 : 0),
+      incorrect: session.incorrect + (answeredCorrectly ? 0 : 1),
     },
   }
 }

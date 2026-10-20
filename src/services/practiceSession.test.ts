@@ -50,7 +50,7 @@ describe('startSession', () => {
 describe('recordResult', () => {
   it('stores a complete attempt and updates the totals', () => {
     const start = startSession(config, makeQuestion('q1'), now)
-    const state = recordResult(start, true, 54, now)
+    const state = recordResult(start, true, 56, now)
     expect(state.attempts).toHaveLength(1)
     expect(state.attempts[0]).toMatchObject({
       questionId: 'q1',
@@ -58,7 +58,7 @@ describe('recordResult', () => {
       firstOperand: 7,
       secondOperand: 8,
       correctAnswer: 56,
-      selectedAnswer: 54,
+      selectedAnswer: 56,
       selfReportedCorrect: true,
       difficulty: 2,
       source: 'regular',
@@ -69,9 +69,16 @@ describe('recordResult', () => {
     expect(hasRecordedCurrentQuestion(state)).toBe(true)
   })
 
-  it('counts an "I got it wrong" as incorrect', () => {
-    const state = recordResult(startSession(config, makeQuestion('q1')), false, 48)
+  it('counts a wrong picked answer as incorrect, even if the student felt confident', () => {
+    const state = recordResult(startSession(config, makeQuestion('q1')), true, 48)
     expect(state.session).toMatchObject({ attempted: 1, correct: 0, incorrect: 1 })
+    expect(state.attempts[0].selfReportedCorrect).toBe(true)
+  })
+
+  it('counts a right picked answer as correct, even if the student felt unsure', () => {
+    const state = recordResult(startSession(config, makeQuestion('q1')), false, 56)
+    expect(state.session).toMatchObject({ attempted: 1, correct: 1, incorrect: 0 })
+    expect(state.attempts[0].selfReportedCorrect).toBe(false)
   })
 
   it('ignores a second result for the same question', () => {

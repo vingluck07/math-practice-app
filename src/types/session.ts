@@ -10,6 +10,7 @@ export interface PracticeAttempt {
   secondOperand: number
   correctAnswer: number
   selectedAnswer: number
+  /** The student's "how do you think you did?" response, given before the answer was revealed. */
   selfReportedCorrect: boolean
   difficulty: DifficultyLevel
   source: QuestionSource
@@ -25,7 +26,9 @@ export interface PracticeSession {
   difficulty: DifficultyLevel
   sessionLength: SessionLength
   attempted: number
+  /** Questions where the picked answer was the right one. */
   correct: number
+  /** Questions where the picked answer was not the right one. */
   incorrect: number
 }
 
