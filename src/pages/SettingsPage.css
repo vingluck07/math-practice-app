@@ -1,0 +1,29 @@
+.settings__note {
+  margin: 0 0 1rem;
+  color: var(--color-muted);
+}
+
+.settings__heading {
+  margin: 1.5rem 0 0.25rem;
+}
+
+.settings__message {
+  min-height: 1.5em;
+  margin: -0.75rem 0 0.75rem;
+  color: #b3261e;
+  font-weight: 700;
+}
+
+.settings__danger p {
+  margin: 0 0 1rem;
+}
+
+.settings__danger .settings__heading {
+  margin-top: 0;
+}
+
+.settings__back {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1rem;
+}

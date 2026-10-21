@@ -361,3 +361,19 @@ Files added or changed:
 - `src/components/statistics/`: overview, breakdown card, operation cards, level cards, recent sessions.
 - `src/pages/StatisticsPage.tsx` / `.css`: the page with the reset confirmation.
 - Tests: statistics calculations, storage, the page, and an end-to-end check after practicing.
+
+## Dialogue 39
+
+**User:** looks great! lets move onto phase 11
+
+**Claude:** Implemented Phase 11 (Settings) and checked off all its items. Lint, build and 259 tests pass. No commit and no new npm packages.
+
+What it does: the Settings page has Preferences (sound effects, card animation, show explanations), Practice defaults (operations, level, session length) and a Clear All Application Data button. Changes save automatically, and the page notes that clearing browser data may erase progress. The setup page starts from the saved defaults, and they can still be changed for a single session. At least one default operation must stay selected. "Show explanations" hides the short message under the revealed answer. Clear All Application Data warns first, then erases settings, sessions, attempts, statistics and mistake patterns (only this app's data), restores the defaults and returns to the home page. Sound effects is saved but the app has no sounds yet, so it has no audible effect.
+
+Files added or changed:
+
+- `src/pages/SettingsPage.tsx` / `.css`: the full settings page and the clear-data confirmation.
+- `src/app/AppProvider.tsx`, `settingsContext.ts`: new `clearAllData` action.
+- `src/pages/PracticeSetupPage.tsx`: starts from the saved defaults.
+- `src/components/practice/CardBack.tsx`: respects "Show explanations".
+- `src/pages/SettingsPage.test.tsx`: tests for settings, defaults and clearing.

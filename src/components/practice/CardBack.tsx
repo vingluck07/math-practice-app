@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Question } from '../../types/question'
+import { useSettings } from '../../app/settingsContext'
 import { formatAnswerText } from '../../utils/math'
 import { Button } from '../common/Button'
 
@@ -25,6 +26,7 @@ export default function CardBack({
   onNext,
   nextLabel = 'Next Question',
 }: CardBackProps) {
+  const { settings } = useSettings()
   const [gotItRight, setGotItRight] = useState<boolean | null>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const revealed = gotItRight !== null
@@ -59,11 +61,13 @@ export default function CardBack({
       {revealed ? (
         <>
           <p className="card__hint">You said: {gotItRight ? 'I got it right' : 'I got it wrong'}</p>
-          <p className="card__feedback">
-            {pickedCorrect
-              ? '✓ You picked the correct answer. Great job!'
-              : `Good try! The correct answer is ${question.correctAnswer}.`}
-          </p>
+          {settings.showExplanations && (
+            <p className="card__feedback">
+              {pickedCorrect
+                ? '✓ You picked the correct answer. Great job!'
+                : `Good try! The correct answer is ${question.correctAnswer}.`}
+            </p>
+          )}
           <Button variant="accent" onClick={onNext}>
             {nextLabel}
           </Button>

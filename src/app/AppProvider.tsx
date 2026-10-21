@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
 import { migrateStorage } from '../services/migrations'
+import { clearAppData } from '../services/storageService'
+import { DEFAULT_SETTINGS } from '../utils/defaultSettings'
 import { loadSettings, saveSettings } from '../services/settingsStorage'
 import type { AppSettings } from '../types/settings'
 import { SettingsContext } from './settingsContext'
@@ -29,7 +31,20 @@ export default function AppProvider({ children }: { children: ReactNode }) {
     if (!saveSettings(next).ok) setHasStorageProblem(true)
   }, [])
 
-  const settingsValue = useMemo(() => ({ settings, updateSettings }), [settings, updateSettings])
+  /** Erases all saved data, restores default settings and stamps a fresh schema version. */
+  const clearAllData = useCallback(() => {
+    const cleared = clearAppData()
+    latestSettings.current = DEFAULT_SETTINGS
+    setSettings(DEFAULT_SETTINGS)
+    migrateStorage()
+    if (!cleared) setHasStorageProblem(true)
+    return cleared
+  }, [])
+
+  const settingsValue = useMemo(
+    () => ({ settings, updateSettings, clearAllData }),
+    [settings, updateSettings, clearAllData],
+  )
 
   const reportStorageProblem = useCallback(() => setHasStorageProblem(true), [])
   const dismissStorageProblem = useCallback(() => setHasStorageProblem(false), [])

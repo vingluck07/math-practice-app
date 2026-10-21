@@ -1,16 +1,22 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSettings } from '../app/settingsContext'
 import { Button } from '../components/common/Button'
 import DifficultySelector from '../components/practice/DifficultySelector'
 import OperationSelector from '../components/practice/OperationSelector'
 import SessionLengthSelector from '../components/practice/SessionLengthSelector'
 import type { PracticeConfig } from '../types/session'
-import { DEFAULT_PRACTICE_CONFIG } from '../utils/practiceConfig'
 import './PracticeSetupPage.css'
 
 export default function PracticeSetupPage() {
   const navigate = useNavigate()
-  const [config, setConfig] = useState<PracticeConfig>(DEFAULT_PRACTICE_CONFIG)
+  const { settings } = useSettings()
+  // Start from the saved defaults; changes here only affect this session.
+  const [config, setConfig] = useState<PracticeConfig>(() => ({
+    operations: [...settings.defaultOperations],
+    difficulty: settings.defaultDifficulty,
+    sessionLength: settings.defaultSessionLength,
+  }))
 
   const hasOperation = config.operations.length > 0
 
