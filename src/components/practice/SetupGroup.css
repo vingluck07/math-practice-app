@@ -1,4 +1,5 @@
 .setup-group {
+  min-width: 0;
   margin: 0 0 1.5rem;
   padding: 1rem clamp(1rem, 3vw, 1.75rem) 1.5rem;
   border: 0;
@@ -32,15 +33,10 @@
 }
 
 .setup-group__options--two {
-  grid-template-columns: 1fr;
+  /* As many columns as fit, so large text or zoom simply gives fewer columns. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
 }
 
 .setup-group__extra {
   margin-top: 1rem;
-}
-
-@media (min-width: 640px) {
-  .setup-group__options--two {
-    grid-template-columns: 1fr 1fr;
-  }
 }

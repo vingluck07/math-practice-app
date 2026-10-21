@@ -143,23 +143,23 @@ describe('when saving is not possible', () => {
     blockStorage()
     const user = userEvent.setup()
     renderApp('/practice/session', config)
-    expect(screen.getByRole('status')).toHaveTextContent(/can't save your progress/i)
+    expect(screen.getByText(/can't save your progress/i)).toBeInTheDocument()
 
     await answerOne(user, 'Next Question')
     expect(screen.getByText('Question 2 of 5')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'OK' }))
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.queryByText(/can't save your progress/i)).not.toBeInTheDocument()
   })
 
   it('shows the warning if storage fills up mid-session, and practice continues', async () => {
     const user = userEvent.setup()
     renderApp('/practice/session', config)
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.queryByText(/can't save your progress/i)).not.toBeInTheDocument()
 
     fillStorage()
     await answerOne(user, 'Next Question')
-    expect(screen.getByRole('status')).toHaveTextContent(/can't save your progress/i)
+    expect(screen.getByText(/can't save your progress/i)).toBeInTheDocument()
     expect(screen.getByText('Question 2 of 5')).toBeInTheDocument()
   })
 

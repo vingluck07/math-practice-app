@@ -6,8 +6,11 @@ import PageContainer from './PageContainer'
 export default function Layout() {
   return (
     <>
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
       <Header />
-      <main>
+      <main id="main" tabIndex={-1}>
         <PageContainer>
           <StorageWarning />
           <Outlet />

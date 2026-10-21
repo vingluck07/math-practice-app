@@ -1,8 +1,11 @@
 .btn {
-  --btn-from: #4083f5;
-  --btn-to: #2f6fed;
-  --btn-hover-from: #2f6fed;
-  --btn-hover-to: #1f56c4;
+  max-width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+  --btn-from: #2b66e3;
+  --btn-to: #2257c8;
+  --btn-hover-from: #2257c8;
+  --btn-hover-to: #1a4aab;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -48,10 +51,10 @@
 }
 
 .btn--accent {
-  --btn-from: #1fa866;
-  --btn-to: #17935a;
-  --btn-hover-from: #17935a;
-  --btn-hover-to: #0f7a47;
+  --btn-from: #17854f;
+  --btn-to: #0f7a47;
+  --btn-hover-from: #0f7a47;
+  --btn-hover-to: #0a6339;
 }
 
 @media (prefers-reduced-motion: reduce) {

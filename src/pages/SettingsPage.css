@@ -10,7 +10,7 @@
 .settings__message {
   min-height: 1.5em;
   margin: -0.75rem 0 0.75rem;
-  color: #b3261e;
+  color: var(--color-error);
   font-weight: 700;
 }
 

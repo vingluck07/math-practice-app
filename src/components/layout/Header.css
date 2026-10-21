@@ -21,7 +21,7 @@
   text-decoration: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5em) {
   .header__inner {
     justify-content: center;
   }

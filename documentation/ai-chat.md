@@ -455,3 +455,22 @@ Files added or changed:
 - `src/components/statistics/MistakeOverview.tsx`, `MistakeDetails.tsx`, `MistakeStatistics.css`: the new sections.
 - `src/hooks/useStatistics.ts`, `src/pages/StatisticsPage.tsx`: load and show them.
 - Tests: `mistakeStatistics.test.ts` and new cases in `StatisticsPage.test.tsx`.
+
+## Dialogue 44
+
+**User:** looks good, lets do phase 16
+
+**Claude:** Implemented Phase 16 (Accessibility) and checked off all its items. Lint, build and 380 tests pass (repeated runs stable). No commit and no new npm packages. I also checked every page in a real browser at 200% and 400% zoom and at 200% text size (down to a 360px-wide phone): nothing scrolls sideways any more.
+
+What changed:
+
+- **Keyboard:** a "Skip to main content" link is the first Tab stop. Number keys 1 to 4 pick answers but are ignored while typing in a field, while a dialog is open, or with Ctrl, Alt or Cmd held. Buttons already work with Enter and Space (tested). Focus indicators were already visible.
+- **Screen readers:** a polite announcement for each new question ("Question 3 of 10. 2 answered, 1 correct so far"), and one when the answer is revealed ("Answer revealed. 7 times 8 equals 56. You picked 54."). Focus still moves to the new question and to the answer. Every button, link, checkbox, radio and progress bar on every page is tested for an accessible name (there are no icon-only buttons).
+- **Reduced motion:** the app now detects the device's reduced-motion setting and uses the no-animation card (one face at a time, so the change is still clear). The Settings page explains this when it applies. The app's own animation setting still works.
+- **Visual:** several colours were darkened to reach at least 4.5:1 contrast (muted text, error text, link blue, blue and green button gradients); borders of choices and answers now reach 3:1. Selected answers show a check mark and results use words, not colour alone. The page text size now follows the browser's setting (it was fixed at 16px). Layouts use flexible columns and wrap long words so large text or zoom gives fewer columns instead of overflow.
+
+Files added or changed:
+
+- `src/hooks/useReducedMotion.ts`; `src/app/accessibility.test.tsx` (keyboard, screen reader, reduced motion and contrast tests that read the real stylesheets); `src/test/mediaHelpers.ts`.
+- `src/index.css`, `Layout.tsx`, `PracticePage.tsx`, `QuestionCard.tsx`, `CardBack.tsx`, `SettingsPage.tsx`, and several CSS files for colours and flexible layout.
+- `vite.config.ts`: tests can now read stylesheets as text (`css: true`).

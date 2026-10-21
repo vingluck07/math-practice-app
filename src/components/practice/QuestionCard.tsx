@@ -19,6 +19,12 @@ interface QuestionCardProps {
   nextLabel?: string
 }
 
+/** True when a key press is aimed at something the person is typing in or choosing from. */
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  return target.isContentEditable || target.closest('input, textarea, select') !== null
+}
+
 /**
  * One flip card. Render it with `key={question.id}` so the selection and flip
  * state reset for every new question.
@@ -50,6 +56,7 @@ export default function QuestionCard({
     if (isCardFlipped) return
     function handleKey(event: KeyboardEvent) {
       if (event.ctrlKey || event.metaKey || event.altKey) return
+      if (isTypingTarget(event.target) || document.querySelector('[role="dialog"]')) return
       const choice = question.choices[Number(event.key) - 1]
       if (choice !== undefined) setSelectedAnswer(choice)
     }

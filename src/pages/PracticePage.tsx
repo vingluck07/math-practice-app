@@ -6,6 +6,7 @@ import ConfirmDialog from '../components/common/ConfirmDialog'
 import ProgressBar from '../components/practice/ProgressBar'
 import QuestionCard from '../components/practice/QuestionCard'
 import { usePracticeSession } from '../hooks/usePracticeSession'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import type { PracticeConfig } from '../types/session'
 import { isValidPracticeConfig } from '../utils/validation'
 import './PracticePage.css'
@@ -14,6 +15,7 @@ function ActiveSession({ config }: { config: PracticeConfig }) {
   const { settings } = useSettings()
   const navigate = useNavigate()
   const practice = usePracticeSession(config)
+  const reducedMotion = useReducedMotion()
   const [confirmingEnd, setConfirmingEnd] = useState(false)
   const { state } = practice
   const isContinuous = config.sessionLength === 'continuous'
@@ -44,6 +46,13 @@ function ActiveSession({ config }: { config: PracticeConfig }) {
   return (
     <section>
       <h1 className="sr-only">Practice</h1>
+      {/* Announces each new question and how the session is going. */}
+      <p className="sr-only" role="status">
+        {isContinuous
+          ? `Question ${state.currentQuestionIndex + 1}.`
+          : `Question ${state.currentQuestionIndex + 1} of ${config.sessionLength}.`}{' '}
+        {state.session.attempted} answered, {state.session.correct} correct so far.
+      </p>
       {!isContinuous && (
         <ProgressBar completed={state.session.attempted} total={config.sessionLength as number} />
       )}
@@ -52,7 +61,7 @@ function ActiveSession({ config }: { config: PracticeConfig }) {
         question={state.currentQuestion}
         questionNumber={state.currentQuestionIndex + 1}
         total={config.sessionLength}
-        animate={settings.cardAnimationEnabled}
+        animate={settings.cardAnimationEnabled && !reducedMotion}
         nextLabel={practice.isLastQuestion ? 'See Results' : 'Next Question'}
         onResult={practice.recordResult}
         onNext={practice.next}

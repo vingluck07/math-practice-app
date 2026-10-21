@@ -12,5 +12,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
+    // Let tests read the real stylesheets as text (used by the colour-contrast checks).
+    css: true,
   },
 })

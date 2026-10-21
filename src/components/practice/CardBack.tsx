@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Question } from '../../types/question'
 import { useSettings } from '../../app/settingsContext'
-import { formatAnswerText } from '../../utils/math'
+import { formatAnswerText, spokenQuestionText } from '../../utils/math'
 import { Button } from '../common/Button'
 
 interface CardBackProps {
@@ -45,6 +45,16 @@ export default function CardBack({
 
   return (
     <div className="card-face__content">
+      {/* Announces the answer when it is revealed (focus also moves to the answer heading). */}
+      <p className="sr-only" role="status">
+        {revealed
+          ? `Answer revealed. ${spokenQuestionText(
+              question.operation,
+              question.firstOperand,
+              question.secondOperand,
+            )} equals ${question.correctAnswer}. You picked ${selectedAnswer}.`
+          : ''}
+      </p>
       <p className="card__progress">{revealed ? 'The answer' : 'Your answer'}</p>
       <h2 className="card__question" tabIndex={-1} ref={heading}>
         {revealed

@@ -45,7 +45,7 @@
   font-size: 1rem;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 56.25em) {
   .summary__actions {
     flex-wrap: wrap;
   }

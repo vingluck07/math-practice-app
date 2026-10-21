@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../app/settingsContext'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import { useStorageStatus } from '../app/storageStatusContext'
 import { Button, ButtonLink } from '../components/common/Button'
 import ChoiceCard from '../components/common/ChoiceCard'
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const { settings, updateSettings, clearAllData } = useSettings()
   const { reportStorageProblem } = useStorageStatus()
   const navigate = useNavigate()
+  const reducedMotion = useReducedMotion()
   const [confirmingClear, setConfirmingClear] = useState(false)
   const [operationsMessage, setOperationsMessage] = useState('')
 
@@ -60,7 +62,11 @@ export default function SettingsPage() {
               updateSettings({ cardAnimationEnabled: !settings.cardAnimationEnabled })
             }
             label="Card animation"
-            description="Flip the practice cards with a spinning animation."
+            description={
+              reducedMotion
+                ? 'Your device asks for less motion, so cards change without spinning.'
+                : 'Flip the practice cards with a spinning animation.'
+            }
           />
           <ChoiceCard
             type="checkbox"
