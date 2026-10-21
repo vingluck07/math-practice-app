@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Question } from '../../types/question'
 import type { SessionLength } from '../../types/session'
 import CardBack from './CardBack'
@@ -61,10 +61,19 @@ export default function QuestionCard({
     target?.focus({ preventScroll: true })
   }, [isCardFlipped])
 
-  function select(value: number) {
+  // Handlers stay the same between renders so the memoized answer buttons are not redrawn.
+  const onSelectRef = useRef(onSelect)
+  useEffect(() => {
+    onSelectRef.current = onSelect
+  })
+  const flippedRef = useRef(false)
+  useEffect(() => {
+    flippedRef.current = isCardFlipped
+  }, [isCardFlipped])
+  const select = useCallback((value: number) => {
     setSelectedAnswer(value)
-    onSelect?.(value)
-  }
+    onSelectRef.current?.(value)
+  }, [])
 
   // Number keys 1–4 pick an answer until the card is flipped.
   useEffect(() => {
@@ -77,12 +86,14 @@ export default function QuestionCard({
     }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCardFlipped, question.choices])
+  }, [isCardFlipped, question.choices, select])
 
-  function handleSelect(value: number) {
-    if (!isCardFlipped) select(value)
-  }
+  const handleSelect = useCallback(
+    (value: number) => {
+      if (!flippedRef.current) select(value)
+    },
+    [select],
+  )
 
   function handleFlip() {
     if (selectedAnswer !== null) setIsCardFlipped(true)

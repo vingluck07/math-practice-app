@@ -9,6 +9,8 @@ import ConfirmDialog from '../components/common/ConfirmDialog'
 import DifficultySelector from '../components/practice/DifficultySelector'
 import OperationSelector from '../components/practice/OperationSelector'
 import SessionLengthSelector from '../components/practice/SessionLengthSelector'
+import { getStorageUsage } from '../services/storageService'
+import { formatUsage } from '../utils/formatUsage'
 import type { MathOperation } from '../types/question'
 import './SettingsPage.css'
 
@@ -18,6 +20,8 @@ export default function SettingsPage() {
   const navigate = useNavigate()
   const reducedMotion = useReducedMotion()
   const [confirmingClear, setConfirmingClear] = useState(false)
+  // Measured once when the page opens.
+  const [usage] = useState(getStorageUsage)
   const [operationsMessage, setOperationsMessage] = useState('')
 
   function changeOperations(operations: MathOperation[]) {
@@ -112,6 +116,10 @@ export default function SettingsPage() {
         <Button variant="secondary" onClick={() => setConfirmingClear(true)}>
           Clear All Application Data
         </Button>
+        <p className="settings__note">
+          Saved data: about {formatUsage(usage.usedCharacters)} of the roughly{' '}
+          {formatUsage(usage.approximateLimit)} your browser allows.
+        </p>
       </div>
 
       <p className="settings__back">

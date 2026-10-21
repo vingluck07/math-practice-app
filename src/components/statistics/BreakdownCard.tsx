@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { OperationStatistics } from '../../types/statistics'
 import { accuracyOf } from '../../services/statisticsService'
 import './BreakdownCard.css'
@@ -9,7 +10,7 @@ interface BreakdownCardProps {
 }
 
 /** Attempted, correct, incorrect and accuracy for one operation or one level. */
-export default function BreakdownCard({ title, icon, counts }: BreakdownCardProps) {
+export default memo(function BreakdownCard({ title, icon, counts }: BreakdownCardProps) {
   const accuracy = accuracyOf(counts)
   return (
     <article className="breakdown">
@@ -41,4 +42,4 @@ export default function BreakdownCard({ title, icon, counts }: BreakdownCardProp
       </dl>
     </article>
   )
-}
+})

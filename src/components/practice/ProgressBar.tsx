@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import './ProgressBar.css'
 
 interface ProgressBarProps {
@@ -6,7 +7,7 @@ interface ProgressBarProps {
 }
 
 /** Shows how many questions of a fixed-length session are done. */
-export default function ProgressBar({ completed, total }: ProgressBarProps) {
+export default memo(function ProgressBar({ completed, total }: ProgressBarProps) {
   const percent = total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0
   return (
     <div
@@ -21,4 +22,4 @@ export default function ProgressBar({ completed, total }: ProgressBarProps) {
       <div className="progress__fill" style={{ width: `${percent}%` }} />
     </div>
   )
-}
+})

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import './AnswerChoice.css'
 
 interface AnswerChoiceProps {
@@ -10,7 +11,8 @@ interface AnswerChoiceProps {
   onSelect: (value: number) => void
 }
 
-export default function AnswerChoice({
+/** Memoized: picking an answer only redraws the choices whose state changed. */
+export default memo(function AnswerChoice({
   value,
   position,
   selected,
@@ -36,4 +38,4 @@ export default function AnswerChoice({
       <span className="answer__check" data-text="✓" aria-hidden="true" />
     </button>
   )
-}
+})

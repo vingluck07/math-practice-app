@@ -129,3 +129,26 @@ export function clearAppData(): boolean {
     return false
   }
 }
+
+/** What this app has saved: characters used (about two bytes each) and a rough browser limit. */
+export interface StorageUsage {
+  usedCharacters: number
+  /** Browsers typically allow about 5 million characters per site. */
+  approximateLimit: number
+}
+
+export const APPROXIMATE_STORAGE_LIMIT = 5_000_000
+
+/** Measures only this app's keys (names and values). Returns zero when storage is unavailable. */
+export function getStorageUsage(): StorageUsage {
+  const storage = getStorage()
+  let used = 0
+  if (storage) {
+    try {
+      for (const key of appKeys(storage)) used += key.length + (storage.getItem(key)?.length ?? 0)
+    } catch {
+      used = 0
+    }
+  }
+  return { usedCharacters: used, approximateLimit: APPROXIMATE_STORAGE_LIMIT }
+}

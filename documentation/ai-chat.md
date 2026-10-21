@@ -549,3 +549,19 @@ Added:
 - **Screen reader:** I can't run one, so `documentation/accessibility-testing.md` has a short NVDA checklist; that one item stays unchecked.
 
 Files: `src/test/practiceHelpers.tsx`, `src/app/integration.test.tsx`, `keyboardSession.test.tsx`, `axe.test.tsx`, `components/practice/AnswerChoice.tsx` and `.css`, `accessibility.test.tsx`, `package.json`, `package-lock.json`, `documentation/accessibility-testing.md`.
+
+## Dialogue 49
+
+**User:** looks good, move onto 22
+
+**Claude:** (Phase 21 was not done yet, so I asked whether to skip it.) **User:** Phase 21 first.
+
+**Claude:** Implemented Phase 21 (Performance and Data Management) and checked off all its items. Lint, tsc, build and 484 tests pass (two runs). No commit. Dependency change: removed `@fontsource-variable/fredoka` (the font is now a bundled Latin-only file), so run `npm install` to tidy `node_modules`.
+
+What changed:
+
+- **Rendering:** memoized small display components, stable handlers in the question card, memoized mistake lists. Statistics were already computed once per visit; question generation was already outside render.
+- **Large histories:** tested with 5,000 attempts (about 1.5 million characters, under a third of the browser limit; loads in milliseconds). Older attempt details are dropped first but the running totals keep counting. Settings now shows how much saved data there is.
+- **Loading:** Statistics and Settings pages load on demand and are fetched in the background after the first page appears. Main bundle 364 KB (114 KB gzipped). Latin-only font. On a throttled browser (6x CPU, slow network) the home page is ready in about 1.4 s and statistics with 5,000 attempts opens in under 0.7 s, with no console errors.
+
+Files: `src/app/lazyPage.tsx`, `lazyPages.ts`, `AppRoutes.tsx`, `main.tsx`, `index.css`, `assets/fonts/*`, `services/storageService.ts` (`getStorageUsage`), `utils/formatUsage.ts`, `pages/SettingsPage.tsx`, memoized components, `QuestionCard.tsx`, `MistakeDetails.tsx`, `test/setup.ts`, tests (`largeHistory`, `renders`, `lazyPage`, `formatUsage`), `documentation/performance-notes.md`, `package.json`, `package-lock.json`.

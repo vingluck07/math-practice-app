@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { MistakePattern } from '../../types/mistake'
 import { formatAnswerText } from '../../utils/math'
 import { Button } from '../common/Button'
@@ -23,8 +23,8 @@ function formatDate(iso: string): string {
 /** Each mistake with its miss count, mastery progress and last miss. Active and mastered are shown separately. */
 export default function MistakeDetails({ patterns, threshold }: MistakeDetailsProps) {
   const [view, setView] = useState<'active' | 'mastered'>('active')
-  const active = patterns.filter((p) => !p.mastered)
-  const mastered = patterns.filter((p) => p.mastered)
+  const active = useMemo(() => patterns.filter((p) => !p.mastered), [patterns])
+  const mastered = useMemo(() => patterns.filter((p) => p.mastered), [patterns])
   const shown = view === 'active' ? active : mastered
 
   if (patterns.length === 0) return null
