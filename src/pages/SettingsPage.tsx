@@ -70,6 +70,16 @@ export default function SettingsPage() {
           />
           <ChoiceCard
             type="checkbox"
+            name="feedbackEffectsEnabled"
+            checked={settings.feedbackEffectsEnabled}
+            onChange={() =>
+              updateSettings({ feedbackEffectsEnabled: !settings.feedbackEffectsEnabled })
+            }
+            label="Cheering messages"
+            description="Friendly messages and a little celebration after each answer."
+          />
+          <ChoiceCard
+            type="checkbox"
             name="showExplanations"
             checked={settings.showExplanations}
             onChange={() => updateSettings({ showExplanations: !settings.showExplanations })}

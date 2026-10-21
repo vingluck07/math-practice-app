@@ -81,7 +81,7 @@
 
 .card__choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   gap: 0.75rem;
   width: 100%;
 }
@@ -126,5 +126,44 @@
 
   .flip--animated .flip__inner {
     transition: none;
+  }
+}
+
+/* A single, short pop when the right answer was picked. */
+.card__feedback--celebrate {
+  animation: feedback-pop 0.45s ease;
+}
+
+@keyframes feedback-pop {
+  0% {
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card__feedback--celebrate {
+    animation: none;
+  }
+}
+
+/* Landscape on a phone or small tablet: keep the whole card on screen. */
+@media (orientation: landscape) and (max-height: 32em) {
+  .card-face__content {
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .card__question {
+    font-size: clamp(2rem, 8vh, 3rem);
+  }
+
+  .card__choices {
+    gap: 0.5rem;
   }
 }

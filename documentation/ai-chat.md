@@ -474,3 +474,23 @@ Files added or changed:
 - `src/hooks/useReducedMotion.ts`; `src/app/accessibility.test.tsx` (keyboard, screen reader, reduced motion and contrast tests that read the real stylesheets); `src/test/mediaHelpers.ts`.
 - `src/index.css`, `Layout.tsx`, `PracticePage.tsx`, `QuestionCard.tsx`, `CardBack.tsx`, `SettingsPage.tsx`, and several CSS files for colours and flexible layout.
 - `vite.config.ts`: tests can now read stylesheets as text (`css: true`).
+
+## Dialogue 45
+
+**User:** great move on to phase 17
+
+**Claude:** Implemented Phase 17 (Responsive Design and Polish) and checked off all its items. Lint, build and 390 tests pass (repeated runs stable). No commit and no new npm packages. I tested every page in a real browser on tablets (portrait and landscape), a laptop, and phones from 320px wide up, in portrait and landscape: no horizontal scrolling anywhere, every button and link is at least 44px, and on tablets and laptops the whole practice card (answers and Flip Card) fits on screen without scrolling.
+
+What changed:
+
+- **Tablets:** answer choices are a tidy 2 by 2 grid (previously a lopsided 3 plus 1 on some tablets); the card stays centered; the header title is now a full-size touch target.
+- **Phones:** answers stack into one column when narrow; the navigation is a compact single row of four equal links (it wraps only for very large text); in landscape the card is tightened so everything still fits on screen.
+- **Statistics:** already card-based, so no tables to convert; I verified labels and values do not overlap and recent sessions stay readable on small screens.
+- **Child-friendly feedback:** after a correct pick you see "You picked the correct answer." plus a random cheer (Great job!, Nice work!, You got it!...), with one short pop animation; after a different pick you see a supportive line first (Good try!, Mistakes help us learn!, Keep going, you can do it!...) and then the correct answer. Messages never repeat twice in a row and use no shaming words (a test checks this). A new Settings option, "Cheering messages", turns the cheers and the pop off, leaving plain feedback. The pop also respects reduced motion and the card animation setting.
+
+Files added or changed:
+
+- `src/utils/feedback.ts` (+ test): the message lists and random choice.
+- `src/components/practice/CardBack.tsx`, `QuestionCard.css`, `CardFeedback.test.tsx`: the feedback and its tests.
+- `src/pages/SettingsPage.tsx`, `types/settings.ts`, `defaultSettings.ts`, `storageValidation.ts`: the new setting (older saved settings get it switched on).
+- `Navigation.css`, `Header.css`, `AnswerChoice.css`: small-screen and landscape polish.

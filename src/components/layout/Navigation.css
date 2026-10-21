@@ -28,3 +28,24 @@
   background: var(--color-primary);
   color: #fff;
 }
+
+/* Small screens: one tidy row of equal-width links (wrapping only if text is very large). */
+@media (max-width: 37.5em) {
+  .nav {
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .nav li {
+    flex: 1 1 4.5rem;
+  }
+
+  .nav__link {
+    justify-content: center;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.4rem 0.25rem;
+    font-size: 1rem;
+    text-align: center;
+  }
+}

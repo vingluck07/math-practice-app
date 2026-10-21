@@ -122,6 +122,10 @@ export function sanitizeSettings(raw: unknown): AppSettings {
         : d.cardAnimationEnabled,
     showExplanations:
       typeof raw.showExplanations === 'boolean' ? raw.showExplanations : d.showExplanations,
+    feedbackEffectsEnabled:
+      typeof raw.feedbackEffectsEnabled === 'boolean'
+        ? raw.feedbackEffectsEnabled
+        : d.feedbackEffectsEnabled,
     defaultSessionLength: isSessionLength(raw.defaultSessionLength)
       ? (raw.defaultSessionLength as AppSettings['defaultSessionLength'])
       : d.defaultSessionLength,

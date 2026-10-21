@@ -58,4 +58,12 @@ describe('settings storage', () => {
     expect(loadSettings()).toEqual(DEFAULT_SETTINGS)
     expect(saveSettings(DEFAULT_SETTINGS)).toEqual({ ok: false, reason: 'unavailable' })
   })
+
+  it('adds the cheering-messages setting (on) to settings saved before it existed', () => {
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({ cardAnimationEnabled: false }))
+    expect(loadSettings()).toMatchObject({
+      cardAnimationEnabled: false,
+      feedbackEffectsEnabled: true,
+    })
+  })
 })

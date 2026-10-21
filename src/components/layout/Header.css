@@ -15,6 +15,9 @@
 }
 
 .header__title {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
   color: var(--color-primary);
   font-size: 1.6rem;
   font-weight: 700;
@@ -24,5 +27,11 @@
 @media (max-width: 37.5em) {
   .header__inner {
     justify-content: center;
+    gap: 0.25rem;
+    padding-block: 0.5rem;
+  }
+
+  .header__title {
+    font-size: 1.3rem;
   }
 }

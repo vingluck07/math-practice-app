@@ -28,6 +28,7 @@ describe('SettingsPage', () => {
     expect(box(/sound effects/i)).toBeChecked()
     expect(box(/card animation/i)).toBeChecked()
     expect(box(/show explanations/i)).toBeChecked()
+    expect(box(/cheering messages/i)).toBeChecked()
     expect(screen.getByRole('checkbox', { name: /addition/i })).toBeChecked()
     expect(screen.getByRole('radio', { name: /beginner/i })).toBeChecked()
     expect(screen.getByRole('radio', { name: /10 questions/i })).toBeChecked()
@@ -39,6 +40,7 @@ describe('SettingsPage', () => {
     renderApp('/settings')
     await user.click(box(/sound effects/i))
     await user.click(box(/show explanations/i))
+    await user.click(box(/cheering messages/i))
     await user.click(screen.getByRole('checkbox', { name: /multiplication/i }))
     await user.click(screen.getByRole('radio', { name: /advanced/i }))
     await user.click(screen.getByRole('radio', { name: /20 questions/i }))
@@ -46,6 +48,7 @@ describe('SettingsPage', () => {
     expect(loadSettings()).toMatchObject({
       soundEffectsEnabled: false,
       showExplanations: false,
+      feedbackEffectsEnabled: false,
       defaultOperations: ['addition', 'multiplication'],
       defaultDifficulty: 4,
       defaultSessionLength: 20,

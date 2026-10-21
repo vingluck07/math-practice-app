@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Question } from '../../types/question'
 import { useSettings } from '../../app/settingsContext'
+import { nextFeedback } from '../../utils/feedback'
 import { formatAnswerText, spokenQuestionText } from '../../utils/math'
 import { Button } from '../common/Button'
 
@@ -31,9 +32,13 @@ export default function CardBack({
   const heading = useRef<HTMLHeadingElement>(null)
   const revealed = gotItRight !== null
   const pickedCorrect = selectedAnswer === question.correctAnswer
+  // Chosen once, when the answer is revealed, so it does not change when the card re-renders.
+  const [cheer, setCheer] = useState('')
+  const cheering = settings.feedbackEffectsEnabled
 
   function record(value: boolean) {
     if (revealed) return
+    setCheer(nextFeedback(pickedCorrect ? 'correct' : 'incorrect'))
     setGotItRight(value)
     onResult(value)
   }
@@ -72,10 +77,16 @@ export default function CardBack({
         <>
           <p className="card__hint">You said: {gotItRight ? 'I got it right' : 'I got it wrong'}</p>
           {settings.showExplanations && (
-            <p className="card__feedback">
+            <p
+              className={
+                cheering && pickedCorrect && settings.cardAnimationEnabled
+                  ? 'card__feedback card__feedback--celebrate'
+                  : 'card__feedback'
+              }
+            >
               {pickedCorrect
-                ? '✓ You picked the correct answer. Great job!'
-                : `Good try! The correct answer is ${question.correctAnswer}.`}
+                ? `✓ You picked the correct answer.${cheering ? ` ${cheer}` : ''}`
+                : `${cheering ? `${cheer} ` : ''}The correct answer is ${question.correctAnswer}.`}
             </p>
           )}
           <Button variant="accent" onClick={onNext}>
