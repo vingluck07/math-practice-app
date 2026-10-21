@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { useSettings } from '../app/settingsContext'
 import { Button, ButtonLink } from '../components/common/Button'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import EmptyState from '../components/common/EmptyState'
 import DifficultyStatisticsCards from '../components/statistics/DifficultyStatistics'
+import MistakeDetails from '../components/statistics/MistakeDetails'
+import MistakeOverview from '../components/statistics/MistakeOverview'
 import OperationStatisticsCards from '../components/statistics/OperationStatistics'
 import RecentSessions from '../components/statistics/RecentSessions'
 import StatisticsOverview from '../components/statistics/StatisticsOverview'
@@ -10,7 +13,8 @@ import { useStatistics } from '../hooks/useStatistics'
 import './StatisticsPage.css'
 
 export default function StatisticsPage() {
-  const { statistics, recentSessions, reset } = useStatistics()
+  const { statistics, recentSessions, mistakes, patterns, reset } = useStatistics()
+  const { settings } = useSettings()
   const [confirmingReset, setConfirmingReset] = useState(false)
   const hasData = statistics.attempted > 0 || recentSessions.length > 0
 
@@ -45,6 +49,18 @@ export default function StatisticsPage() {
             <h2>By Level</h2>
             <DifficultyStatisticsCards statistics={statistics} />
           </div>
+
+          <div className="stats-section">
+            <h2>Mistake Review</h2>
+            <MistakeOverview mistakes={mistakes} />
+          </div>
+
+          {patterns.length > 0 && (
+            <div className="stats-section">
+              <h2>Mistake Details</h2>
+              <MistakeDetails patterns={patterns} threshold={settings.masteryThreshold} />
+            </div>
+          )}
 
           <div className="stats-section">
             <h2>Recent Sessions</h2>

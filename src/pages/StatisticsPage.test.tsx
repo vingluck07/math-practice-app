@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import AppProvider from '../app/AppProvider'
 import AppRoutes from '../app/AppRoutes'
 import { STORAGE_KEYS, writeItem } from '../services/storageService'
-import { makeAttempt, makeSession } from '../test/factories'
+import { makeAttempt, makePattern, makeSession } from '../test/factories'
 
 function renderStatistics() {
   return render(
@@ -181,5 +181,140 @@ describe('Reset Statistics', () => {
       expect(localStorage.getItem(STORAGE_KEYS[key])).toBeNull()
     }
     expect(localStorage.getItem(STORAGE_KEYS.settings)).toContain('cardAnimationEnabled')
+  })
+})
+
+describe('StatisticsPage mistake review', () => {
+  const dtValue = (region: HTMLElement, label: string) =>
+    within(region).getByText(label, { selector: 'dt' }).parentElement as HTMLElement
+
+  function seedMistakes() {
+    seedHistory()
+    writeItem(STORAGE_KEYS.mistakePatterns, [
+      makePattern({
+        id: 'multiplication:8:7',
+        operation: 'multiplication',
+        firstOperand: 8,
+        secondOperand: 7,
+        correctAnswer: 56,
+        incorrectCount: 4,
+        similarCorrectCount: 1,
+        lastIncorrectAt: '2026-10-10T12:00:00.000Z',
+      }),
+      makePattern({ id: 'addition:3:4', incorrectCount: 1, similarCorrectCount: 2 }),
+      makePattern({
+        id: 'subtraction:9:4',
+        operation: 'subtraction',
+        firstOperand: 9,
+        secondOperand: 4,
+        correctAnswer: 5,
+        incorrectCount: 2,
+        similarCorrectCount: 3,
+        mastered: true,
+      }),
+    ])
+    writeItem(STORAGE_KEYS.attempts, [
+      makeAttempt({ source: 'mistake-review', correct: true }),
+      makeAttempt({ source: 'mistake-review', correct: true }),
+      makeAttempt({ source: 'mistake-review', correct: false }),
+      makeAttempt({ source: 'regular', correct: true }),
+    ])
+  }
+
+  it('shows counts for active and mastered mistakes and review questions', () => {
+    seedMistakes()
+    renderStatistics()
+    const region = screen.getByLabelText('Mistake review statistics')
+    expect(dtValue(region, 'Active mistakes')).toHaveTextContent('2')
+    expect(dtValue(region, 'Mastered')).toHaveTextContent('1')
+    expect(dtValue(region, 'Review questions')).toHaveTextContent('3')
+    expect(dtValue(region, 'Review correct')).toHaveTextContent('2')
+  })
+
+  it('names the most missed operation and lists the most missed facts in order', () => {
+    seedMistakes()
+    renderStatistics()
+    expect(screen.getByText(/most missed operation:/i).parentElement).toHaveTextContent(
+      'Multiplication (4 misses)',
+    )
+    const facts = within(screen.getByRole('list', { name: 'Most missed facts' })).getAllByRole(
+      'listitem',
+    )
+    expect(facts.map((f) => f.textContent)).toEqual([
+      '8 × 7 = 56missed 4 times',
+      '9 − 4 = 5missed 2 times',
+      '3 + 4 = 7missed 1 time',
+    ])
+  })
+
+  it('lists active mistakes with counts, progress and last missed date', () => {
+    seedMistakes()
+    renderStatistics()
+    const list = screen.getByRole('list', { name: 'Active mistakes' })
+    const items = within(list).getAllByRole('listitem')
+    expect(items).toHaveLength(2)
+    expect(items[0]).toHaveTextContent('8 × 7 = 56')
+    expect(items[0]).toHaveTextContent('Missed 4 times')
+    expect(items[0]).toHaveTextContent('1 of 3 similar questions correct')
+    expect(items[0]).toHaveTextContent('2026')
+    expect(within(items[0]).getByRole('progressbar')).toHaveAttribute('value', '1')
+    expect(items[1]).toHaveTextContent('Missed 1 time')
+    expect(items[1]).toHaveTextContent('2 of 3 similar questions correct')
+  })
+
+  it('shows mastered mistakes separately', async () => {
+    seedMistakes()
+    const user = userEvent.setup()
+    renderStatistics()
+    expect(screen.getByRole('button', { name: /^Active \(2\)/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    await user.click(screen.getByRole('button', { name: /^Mastered \(1\)/ }))
+
+    expect(screen.queryByRole('list', { name: 'Active mistakes' })).not.toBeInTheDocument()
+    const items = within(screen.getByRole('list', { name: 'Mastered mistakes' })).getAllByRole(
+      'listitem',
+    )
+    expect(items).toHaveLength(1)
+    expect(items[0]).toHaveTextContent('9 − 4 = 5')
+    expect(items[0]).toHaveTextContent('Mastered')
+  })
+
+  it('uses the mastery threshold from settings', () => {
+    seedMistakes()
+    writeItem(STORAGE_KEYS.settings, { masteryThreshold: 5 })
+    renderStatistics()
+    expect(screen.getByText('1 of 5 similar questions correct')).toBeInTheDocument()
+  })
+
+  it('explains an empty mastered list and an empty active list', async () => {
+    seedHistory()
+    writeItem(STORAGE_KEYS.mistakePatterns, [makePattern()])
+    const user = userEvent.setup()
+    renderStatistics()
+    await user.click(screen.getByRole('button', { name: /^Mastered/ }))
+    expect(screen.getByText('Nothing mastered yet')).toBeInTheDocument()
+
+    writeItem(STORAGE_KEYS.mistakePatterns, [makePattern({ mastered: true })])
+    renderStatistics()
+    expect(screen.getByText('No active mistakes')).toBeInTheDocument()
+  })
+
+  it('shows an empty state when there are no mistakes', () => {
+    seedHistory()
+    renderStatistics()
+    expect(screen.getByText('No mistakes yet')).toBeInTheDocument()
+    expect(screen.queryByText('Mistake Details')).not.toBeInTheDocument()
+  })
+
+  it('is erased by Reset Statistics', async () => {
+    seedMistakes()
+    const user = userEvent.setup()
+    renderStatistics()
+    await user.click(screen.getByRole('button', { name: 'Reset Statistics' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, Erase Everything' }))
+    expect(screen.getByText('No practice yet')).toBeInTheDocument()
+    expect(localStorage.getItem(STORAGE_KEYS.mistakePatterns)).toBeNull()
   })
 })

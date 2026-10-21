@@ -435,3 +435,23 @@ Files added or changed:
 - `src/services/practiceStorage.ts`, `practiceSession.ts`, `src/hooks/usePracticeSession.ts`: review sessions, saving mastery progress.
 - `src/components/practice/ModeSelector.tsx`, `src/pages/PracticeSetupPage.tsx`, `SessionSummaryPage.tsx`, `RecentSessions.tsx`, `ChoiceCard` (disabled option).
 - Types and validation for the new optional fields, plus tests for priority, review questions, mastery, storage, setup and summary pages, and full review sessions.
+
+## Dialogue 43
+
+**User:** looks good, move onto phase 15
+
+**Claude:** Implemented Phase 15 (Advanced Statistics) and checked off all its items. Lint, build and 350 tests pass (repeated runs stable). No commit and no new npm packages.
+
+What it does: the Statistics page has two new sections.
+
+- **Mistake Review:** tiles for Active mistakes, Mastered, Review questions (answered) and Review correct; the most missed operation (counting every miss of every saved mistake; ties list all tied operations, for example "Addition and Division (tied, 2 each)"); and "Facts you miss most", the top 5 facts such as "8 × 7 = 56, missed 4 times". When there are no mistakes it shows a friendly "No mistakes yet" message instead.
+- **Mistake Details:** every mistake with its miss count, mastery progress (a small bar and "1 of 3 similar questions correct", using the mastery threshold from Settings) and the date it was last missed. Buttons switch between Active and Mastered mistakes, each with a count and its own empty message. Mistakes are sorted by miss count, with ties going to the most recently missed.
+
+Reset Statistics already erases all of this.
+
+Files added or changed:
+
+- `src/services/mistakeStatistics.ts`: sorting, most missed operation, mistake totals.
+- `src/components/statistics/MistakeOverview.tsx`, `MistakeDetails.tsx`, `MistakeStatistics.css`: the new sections.
+- `src/hooks/useStatistics.ts`, `src/pages/StatisticsPage.tsx`: load and show them.
+- Tests: `mistakeStatistics.test.ts` and new cases in `StatisticsPage.test.tsx`.
