@@ -1,4 +1,5 @@
 import type { AppSettings } from '../types/settings'
+import type { MistakePattern } from '../types/mistake'
 import type { AppStatistics } from '../types/statistics'
 import type { PracticeAttempt, PracticeSession } from '../types/session'
 import { DEFAULT_SETTINGS } from './defaultSettings'
@@ -51,6 +52,23 @@ export function isStoredSession(value: unknown): value is PracticeSession {
     isCount(value.attempted) &&
     isCount(value.correct) &&
     isCount(value.incorrect)
+  )
+}
+
+export function isStoredMistakePattern(value: unknown): value is MistakePattern {
+  if (!isRecord(value)) return false
+  return (
+    isString(value.id) &&
+    isMathOperation(value.operation) &&
+    isFiniteNumber(value.firstOperand) &&
+    isFiniteNumber(value.secondOperand) &&
+    isFiniteNumber(value.correctAnswer) &&
+    isDifficultyLevel(value.difficulty) &&
+    isCount(value.incorrectCount) &&
+    value.incorrectCount >= 1 &&
+    isCount(value.similarCorrectCount) &&
+    isTimestamp(value.lastIncorrectAt) &&
+    typeof value.mastered === 'boolean'
   )
 }
 

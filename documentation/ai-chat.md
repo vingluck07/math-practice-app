@@ -377,3 +377,19 @@ Files added or changed:
 - `src/pages/PracticeSetupPage.tsx`: starts from the saved defaults.
 - `src/components/practice/CardBack.tsx`: respects "Show explanations".
 - `src/pages/SettingsPage.test.tsx`: tests for settings, defaults and clearing.
+
+## Dialogue 40
+
+**User:** looks good, lets do phase 12
+
+**Claude:** Implemented Phase 12 (Mistake Tracking) and checked off all its items. Lint, build and 272 tests pass. No commit and no new npm packages. This phase works behind the scenes, so there is nothing new to see on screen.
+
+What it does: when the picked answer is wrong, the app saves a mistake pattern (operation, both operands, correct answer, level, last-incorrect time, incorrect count 1, similar-correct count 0). Missing the same question again (same operation and operands) updates that pattern instead of adding a duplicate: the incorrect count goes up, the time is refreshed, and mastery progress resets to 0 (a mastered pattern becomes unmastered). Patterns are saved in the browser (kept to the 500 most recently missed), damaged records are skipped when loading, and at start-up a damaged list is repaired. Reset Statistics and Clear All Application Data already erase patterns.
+
+Files added or changed:
+
+- `src/services/mistakeService.ts`: decides when an answer is a mistake and creates or updates patterns.
+- `src/services/practiceStorage.ts`: loads, saves and repairs mistake patterns; saving an incorrect attempt now also records its pattern.
+- `src/utils/storageValidation.ts`: checks stored patterns.
+- `src/app/AppProvider.tsx`: repairs saved patterns at start-up.
+- Tests: `mistakeService.test.ts`, new cases in `practiceStorage.test.ts` and `persistence.test.tsx`; `test/factories.ts` accepts operands.

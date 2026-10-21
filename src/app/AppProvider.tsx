@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
 import { migrateStorage } from '../services/migrations'
 import { clearAppData } from '../services/storageService'
 import { DEFAULT_SETTINGS } from '../utils/defaultSettings'
+import { repairMistakePatterns } from '../services/practiceStorage'
 import { loadSettings, saveSettings } from '../services/settingsStorage'
 import type { AppSettings } from '../types/settings'
 import { SettingsContext } from './settingsContext'
@@ -10,9 +11,11 @@ import { StorageStatusContext } from './storageStatusContext'
 /** Runs once at startup: upgrades stored data, then loads the saved settings. */
 function startUp(): { settings: AppSettings; storageProblem: boolean } {
   const migration = migrateStorage()
+  const repaired = repairMistakePatterns()
   return {
     settings: loadSettings(),
-    storageProblem: migration.status === 'unavailable' || migration.status === 'failed',
+    storageProblem:
+      migration.status === 'unavailable' || migration.status === 'failed' || !repaired,
   }
 }
 

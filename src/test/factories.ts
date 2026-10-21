@@ -9,6 +9,8 @@ export function makeAttempt(
     operation?: MathOperation
     difficulty?: DifficultyLevel
     correct?: boolean
+    firstOperand?: number
+    secondOperand?: number
     confident?: boolean
     sessionId?: string
     at?: string
@@ -20,8 +22,8 @@ export function makeAttempt(
     id: `attempt-${counter}`,
     questionId: `question-${counter}`,
     operation,
-    firstOperand: 3,
-    secondOperand: 4,
+    firstOperand: options.firstOperand ?? 3,
+    secondOperand: options.secondOperand ?? 4,
     correctAnswer: 7,
     selectedAnswer: correct ? 7 : 8,
     selfReportedCorrect: confident,

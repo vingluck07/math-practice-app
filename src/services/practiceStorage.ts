@@ -1,12 +1,20 @@
+import type { MistakePattern } from '../types/mistake'
 import type { PracticeAttempt, PracticeSession, PracticeSessionState } from '../types/session'
 import type { AppStatistics } from '../types/statistics'
-import { isStoredAttempt, isStoredSession, isStoredStatistics } from '../utils/storageValidation'
+import {
+  isStoredAttempt,
+  isStoredMistakePattern,
+  isStoredSession,
+  isStoredStatistics,
+} from '../utils/storageValidation'
+import { isIncorrectAttempt, recordMistake } from './mistakeService'
 import { addAttemptToStatistics, buildStatistics } from './statisticsService'
 import { STORAGE_KEYS, readItem, removeItem, writeItem, type WriteResult } from './storageService'
 
 /** Older records beyond these limits are dropped so storage never fills up. */
 export const MAX_STORED_SESSIONS = 100
 export const MAX_STORED_ATTEMPTS = 5000
+export const MAX_STORED_MISTAKE_PATTERNS = 500
 
 /** When the browser reports it is full, this fraction of the oldest records is dropped once. */
 const QUOTA_TRIM_FRACTION = 0.2
@@ -52,6 +60,37 @@ export function saveAttempt(attempt: PracticeAttempt): WriteResult {
 /** Loads attempts in the order they were made. Damaged entries are skipped. */
 export function loadAttempts(): PracticeAttempt[] {
   return readList(STORAGE_KEYS.attempts, isStoredAttempt)
+}
+
+/** Loads mistake patterns. Damaged entries are skipped. */
+export function loadMistakePatterns(): MistakePattern[] {
+  return readList(STORAGE_KEYS.mistakePatterns, isStoredMistakePattern)
+}
+
+export function saveMistakePatterns(patterns: MistakePattern[]): WriteResult {
+  // When over the limit, the patterns that were missed longest ago are the ones dropped.
+  const newest = [...patterns]
+    .sort((a, b) => Date.parse(a.lastIncorrectAt) - Date.parse(b.lastIncorrectAt))
+    .slice(-MAX_STORED_MISTAKE_PATTERNS)
+  return writeList(STORAGE_KEYS.mistakePatterns, newest, MAX_STORED_MISTAKE_PATTERNS)
+}
+
+/**
+ * Run at start-up: if the saved mistake patterns contain damaged entries, rewrites
+ * the list without them so they cannot cause trouble later. Returns false if that failed.
+ */
+export function repairMistakePatterns(): boolean {
+  const stored = readItem(STORAGE_KEYS.mistakePatterns, Array.isArray)
+  if (!stored.ok) return stored.reason === 'invalid' ? saveMistakePatterns([]).ok : true
+  const valid = (stored.value as unknown[]).filter(isStoredMistakePattern)
+  if (valid.length === (stored.value as unknown[]).length) return true
+  return saveMistakePatterns(valid).ok
+}
+
+/** Creates or updates the mistake pattern for an incorrectly answered question. */
+function recordAttemptMistake(attempt: PracticeAttempt): WriteResult {
+  if (!isIncorrectAttempt(attempt)) return { ok: true }
+  return saveMistakePatterns(recordMistake(loadMistakePatterns(), attempt))
 }
 
 /**
@@ -104,6 +143,8 @@ export function saveProgress(
     const attempt = next.attempts[next.attempts.length - 1]
     result = saveAttempt(attempt)
     if (result.ok) result = recordAttemptStatistics(attempt)
+    const mistakeResult = recordAttemptMistake(attempt)
+    if (result.ok) result = mistakeResult
   }
   if (next.session !== previous.session) {
     const sessionResult = saveSession(next.session)

@@ -8,7 +8,9 @@ import {
   loadStatistics,
   MAX_STORED_SESSIONS,
   loadAttempts,
+  loadMistakePatterns,
   loadSessions,
+  repairMistakePatterns,
   saveAttempt,
   saveProgress,
   saveSession,
@@ -292,5 +294,74 @@ describe('clearPracticeHistory', () => {
     expect(localStorage.getItem(STORAGE_KEYS.version)).not.toBeNull()
     expect(localStorage.getItem('someOtherApp.theme')).toBe('dark')
     expect(loadStatistics().attempted).toBe(0)
+  })
+})
+
+describe('mistake pattern storage', () => {
+  const config = { operations: ['addition' as const], difficulty: 1 as const, sessionLength: 10 }
+  const question = {
+    id: 'q1',
+    operation: 'addition' as const,
+    firstOperand: 3,
+    secondOperand: 4,
+    displayText: '3 + 4 = ?',
+    correctAnswer: 7,
+    choices: [6, 7, 8, 9],
+    difficulty: 1 as const,
+    source: 'regular' as const,
+  }
+
+  /** Answers the question the way the app does, saving progress. */
+  function answer(selected: number) {
+    const start = startSession(config, question)
+    return saveProgress(start, recordResult(start, true, selected))
+  }
+  const wrong = () => answer(8)
+
+  it('saves a pattern for an incorrect answer and none for a correct one', () => {
+    expect(answer(7).ok).toBe(true)
+    expect(loadMistakePatterns()).toEqual([])
+    expect(wrong().ok).toBe(true)
+    expect(loadMistakePatterns()).toHaveLength(1)
+  })
+
+  it('updates the same pattern when the question is missed again', () => {
+    wrong()
+    wrong()
+    const patterns = loadMistakePatterns()
+    expect(patterns).toHaveLength(1)
+    expect(patterns[0].incorrectCount).toBe(2)
+  })
+
+  it('skips damaged records when loading', () => {
+    wrong()
+    const [good] = loadMistakePatterns()
+    localStorage.setItem(
+      STORAGE_KEYS.mistakePatterns,
+      JSON.stringify([good, { id: 'x' }, null, 'junk', { ...good, id: 'y', incorrectCount: -1 }]),
+    )
+    expect(loadMistakePatterns()).toEqual([good])
+  })
+
+  it('repairs a damaged list at start-up', () => {
+    wrong()
+    const [good] = loadMistakePatterns()
+    localStorage.setItem(STORAGE_KEYS.mistakePatterns, JSON.stringify([good, { id: 'x' }]))
+    expect(repairMistakePatterns()).toBe(true)
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.mistakePatterns) ?? '[]')).toEqual([good])
+
+    localStorage.setItem(STORAGE_KEYS.mistakePatterns, '{{{ broken')
+    expect(repairMistakePatterns()).toBe(true)
+    expect(loadMistakePatterns()).toEqual([])
+  })
+
+  it('leaves missing mistake data alone at start-up', () => {
+    expect(repairMistakePatterns()).toBe(true)
+    expect(localStorage.getItem(STORAGE_KEYS.mistakePatterns)).toBeNull()
+  })
+
+  it('reports a failed save', () => {
+    fillStorage()
+    expect(wrong().ok).toBe(false)
   })
 })

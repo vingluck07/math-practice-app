@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadAttempts, loadSessions } from '../services/practiceStorage'
+import { loadAttempts, loadMistakePatterns, loadSessions } from '../services/practiceStorage'
 import { STORAGE_KEYS } from '../services/storageService'
 import { blockStorage, fillStorage } from '../test/storageHelpers'
 import type { PracticeConfig } from '../types/session'
@@ -164,5 +164,29 @@ describe('when saving is not possible', () => {
     await user.click(animationSwitch())
     expect(animationSwitch()).not.toBeChecked()
     expect(screen.getByRole('status')).toBeInTheDocument()
+  })
+})
+
+describe('mistake patterns while practicing', () => {
+  it('creates one pattern for each wrong answer and none for correct ones', async () => {
+    const user = userEvent.setup()
+    renderApp('/practice/session', {
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 5,
+    })
+    await answerOne(user, 'Next Question', true)
+    expect(loadMistakePatterns()).toEqual([])
+    await answerOne(user, 'Next Question', false)
+
+    const patterns = loadMistakePatterns()
+    expect(patterns).toHaveLength(1)
+    expect(patterns[0]).toMatchObject({
+      operation: 'addition',
+      difficulty: 1,
+      incorrectCount: 1,
+      similarCorrectCount: 0,
+      mastered: false,
+    })
   })
 })
