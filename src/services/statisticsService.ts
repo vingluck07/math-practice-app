@@ -67,6 +67,7 @@ export interface SessionSummary {
   startedAt: string
   operations: MathOperation[]
   difficulty: DifficultyLevel
+  isReview: boolean
   attempted: number
   correct: number
   incorrect: number
@@ -87,6 +88,7 @@ export function recentSessionSummaries(
       startedAt: s.startedAt,
       operations: s.operations,
       difficulty: s.difficulty,
+      isReview: s.mode === 'mistake-review',
       attempted: s.attempted,
       correct: s.correct,
       incorrect: s.incorrect,

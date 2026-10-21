@@ -11,6 +11,7 @@ interface ChoiceCardProps {
   description?: string
   /** Decorative symbol shown beside the label. */
   icon?: ReactNode
+  disabled?: boolean
 }
 
 /** A large, tappable option built on a native checkbox or radio input. */
@@ -22,15 +23,17 @@ export default function ChoiceCard({
   label,
   description,
   icon,
+  disabled = false,
 }: ChoiceCardProps) {
   return (
-    <label className="choice">
+    <label className={disabled ? 'choice choice--disabled' : 'choice'}>
       <input
         className="choice__input"
         type={type}
         name={name}
         checked={checked}
         onChange={onChange}
+        disabled={disabled}
       />
       <span className="choice__body">
         {icon !== undefined && (

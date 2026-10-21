@@ -18,3 +18,12 @@
   min-width: min(100%, 18rem);
   font-size: 1.6rem;
 }
+
+.setup-note {
+  margin: 0 0 1.5rem;
+  padding: 1rem clamp(1rem, 3vw, 1.75rem);
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  font-size: 1.15rem;
+}

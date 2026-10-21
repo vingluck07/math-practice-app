@@ -7,7 +7,8 @@ import {
   isStoredSession,
   isStoredStatistics,
 } from '../utils/storageValidation'
-import { isIncorrectAttempt, recordMistake } from './mistakeService'
+import { applyAttempt } from './mistakeService'
+import { DEFAULT_MASTERY_THRESHOLD } from '../utils/practiceConfig'
 import { addAttemptToStatistics, buildStatistics } from './statisticsService'
 import { STORAGE_KEYS, readItem, removeItem, writeItem, type WriteResult } from './storageService'
 
@@ -87,10 +88,14 @@ export function repairMistakePatterns(): boolean {
   return saveMistakePatterns(valid).ok
 }
 
-/** Creates or updates the mistake pattern for an incorrectly answered question. */
-function recordAttemptMistake(attempt: PracticeAttempt): WriteResult {
-  if (!isIncorrectAttempt(attempt)) return { ok: true }
-  return saveMistakePatterns(recordMistake(loadMistakePatterns(), attempt))
+/**
+ * Updates the mistake patterns for one answered question: wrong answers create or update
+ * a pattern, and mistake-review answers move their pattern toward (or away from) mastery.
+ */
+function recordAttemptMistake(attempt: PracticeAttempt, threshold: number): WriteResult {
+  const patterns = loadMistakePatterns()
+  const updated = applyAttempt(patterns, attempt, threshold)
+  return updated === patterns ? { ok: true } : saveMistakePatterns(updated)
 }
 
 /**
@@ -137,13 +142,14 @@ export function clearPracticeHistory(): boolean {
 export function saveProgress(
   previous: PracticeSessionState,
   next: PracticeSessionState,
+  masteryThreshold: number = DEFAULT_MASTERY_THRESHOLD,
 ): WriteResult {
   let result: WriteResult = { ok: true }
   if (next.attempts.length > previous.attempts.length) {
     const attempt = next.attempts[next.attempts.length - 1]
     result = saveAttempt(attempt)
     if (result.ok) result = recordAttemptStatistics(attempt)
-    const mistakeResult = recordAttemptMistake(attempt)
+    const mistakeResult = recordAttemptMistake(attempt, masteryThreshold)
     if (result.ok) result = mistakeResult
   }
   if (next.session !== previous.session) {

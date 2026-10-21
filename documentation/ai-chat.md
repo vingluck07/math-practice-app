@@ -412,3 +412,26 @@ Files added:
 
 - `src/services/similarQuestions.ts`: the strategies and `generateSimilarQuestion`.
 - `src/services/similarQuestions.test.ts`: tests for every operation, strategy and level.
+
+## Dialogue 42
+
+**User:** ok move onto phase 14
+
+**Claude:** Implemented Phase 14 (Mistake Review Mode) and checked off all its items. Lint, build and 332 tests pass (repeated runs stable). No commit and no new npm packages.
+
+What it does:
+
+- **Setup page:** a new "What kind of practice?" choice: Regular practice or Practice my mistakes. The mistakes option shows how many mistakes are waiting ("2 mistakes to review"). It is greyed out with an explanation when there are none. In review mode the operation and level choices are hidden (questions come from your mistakes); session length can still be chosen.
+- **Choosing mistakes:** each question is made from one active mistake, picked at random with a bias toward ones missed often, missed recently, or with little successful review (equal priority takes turns). A different mistake is used from one question to the next when possible, so sessions mix several.
+- **Mastery:** a correct review answer adds one to the mistake's similar-correct count; reaching the threshold (3 by default, stored in Settings as `masteryThreshold`, validated 1 to 20) marks it mastered, and mastered mistakes are left out of review and the count. A wrong review answer sends that mistake back to 0 and the missed question becomes a mistake of its own. A mastered mistake returns if its question is missed again. If every mistake is mastered mid-session, the session ends and shows the summary.
+- **Recording:** each review attempt stores which mistake produced it; sessions are marked as review sessions.
+- **Summary:** shows the mistake-review question count (already there), "Level: Based on your mistakes" for review sessions, and Practice Mistakes is now a working button (disabled with a note when nothing is left to review). Recent sessions on the Statistics page label review sessions.
+
+Files added or changed:
+
+- `src/services/mistakePriority.ts`: priority score and weighted selection.
+- `src/services/reviewQuestions.ts`: next review question and review-session settings.
+- `src/services/mistakeService.ts`: mastery rules (`recordReviewResult`, `applyAttempt`, active and mastered lists).
+- `src/services/practiceStorage.ts`, `practiceSession.ts`, `src/hooks/usePracticeSession.ts`: review sessions, saving mastery progress.
+- `src/components/practice/ModeSelector.tsx`, `src/pages/PracticeSetupPage.tsx`, `SessionSummaryPage.tsx`, `RecentSessions.tsx`, `ChoiceCard` (disabled option).
+- Types and validation for the new optional fields, plus tests for priority, review questions, mastery, storage, setup and summary pages, and full review sessions.

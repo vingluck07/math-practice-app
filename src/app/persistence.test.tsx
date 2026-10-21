@@ -2,8 +2,14 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadAttempts, loadMistakePatterns, loadSessions } from '../services/practiceStorage'
+import {
+  loadAttempts,
+  loadMistakePatterns,
+  loadSessions,
+  saveMistakePatterns,
+} from '../services/practiceStorage'
 import { STORAGE_KEYS } from '../services/storageService'
+import { makePattern } from '../test/factories'
 import { blockStorage, fillStorage } from '../test/storageHelpers'
 import type { PracticeConfig } from '../types/session'
 import AppProvider from './AppProvider'
@@ -188,5 +194,54 @@ describe('mistake patterns while practicing', () => {
       similarCorrectCount: 0,
       mastered: false,
     })
+  })
+})
+
+describe('mistake review sessions', () => {
+  const config: PracticeConfig = {
+    operations: ['addition'],
+    difficulty: 1,
+    sessionLength: 3,
+    mode: 'mistake-review',
+  }
+
+  it('masters a mistake, then ends the session when nothing is left to review', async () => {
+    saveMistakePatterns([makePattern({ similarCorrectCount: 2 })])
+    const user = userEvent.setup()
+    renderApp('/practice/session', config)
+    await answerOne(user, 'Next Question', true)
+
+    // Two earlier correct answers plus this one reaches the mastery threshold of 3.
+    expect(loadMistakePatterns()[0]).toMatchObject({ similarCorrectCount: 3, mastered: true })
+    expect(loadAttempts()[0]).toMatchObject({
+      source: 'mistake-review',
+      mistakePatternId: 'addition:3:4',
+    })
+    expect(screen.getByRole('heading', { name: 'Session Summary' })).toBeInTheDocument()
+    expect(screen.getByText('Mistake review questions:').parentElement).toHaveTextContent(
+      'Mistake review questions: 1',
+    )
+    expect(loadSessions()[0]).toMatchObject({ mode: 'mistake-review', attempted: 1 })
+  })
+
+  it('sends a mistake back to the start after a wrong answer', async () => {
+    saveMistakePatterns([makePattern({ similarCorrectCount: 2 })])
+    const user = userEvent.setup()
+    renderApp('/practice/session', config)
+    await answerOne(user, 'Next Question', false)
+
+    const patterns = loadMistakePatterns()
+    expect(patterns.find((p) => p.id === 'addition:3:4')).toMatchObject({
+      similarCorrectCount: 0,
+      mastered: false,
+    })
+    // The question that was missed becomes a mistake of its own.
+    expect(patterns.length).toBeGreaterThan(1)
+    expect(screen.queryByRole('heading', { name: 'Session Summary' })).not.toBeInTheDocument()
+  })
+
+  it('offers a way back to setup when there is nothing to review', () => {
+    renderApp('/practice/session', config)
+    expect(screen.getByRole('heading', { name: 'Oops!' })).toBeInTheDocument()
   })
 })

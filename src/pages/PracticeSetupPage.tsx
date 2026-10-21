@@ -2,9 +2,12 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../app/settingsContext'
 import { Button } from '../components/common/Button'
+import ModeSelector from '../components/practice/ModeSelector'
 import DifficultySelector from '../components/practice/DifficultySelector'
 import OperationSelector from '../components/practice/OperationSelector'
 import SessionLengthSelector from '../components/practice/SessionLengthSelector'
+import { activePatterns } from '../services/mistakeService'
+import { loadMistakePatterns } from '../services/practiceStorage'
 import type { PracticeConfig } from '../types/session'
 import './PracticeSetupPage.css'
 
@@ -18,7 +21,10 @@ export default function PracticeSetupPage() {
     sessionLength: settings.defaultSessionLength,
   }))
 
-  const hasOperation = config.operations.length > 0
+  // Counted once when the page opens.
+  const [activeMistakes] = useState(() => activePatterns(loadMistakePatterns()).length)
+  const reviewing = config.mode === 'mistake-review'
+  const hasOperation = reviewing || config.operations.length > 0
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -30,14 +36,27 @@ export default function PracticeSetupPage() {
     <section>
       <h1>Set Up Your Practice</h1>
       <form onSubmit={handleSubmit} noValidate>
-        <OperationSelector
-          value={config.operations}
-          onChange={(operations) => setConfig({ ...config, operations })}
+        <ModeSelector
+          value={config.mode ?? 'regular'}
+          onChange={(mode) => setConfig({ ...config, mode })}
+          activeMistakes={activeMistakes}
         />
-        <DifficultySelector
-          value={config.difficulty}
-          onChange={(difficulty) => setConfig({ ...config, difficulty })}
-        />
+        {reviewing ? (
+          <p className="setup-note">
+            Questions will be made from the mistakes you have missed, mixing different kinds.
+          </p>
+        ) : (
+          <>
+            <OperationSelector
+              value={config.operations}
+              onChange={(operations) => setConfig({ ...config, operations })}
+            />
+            <DifficultySelector
+              value={config.difficulty}
+              onChange={(difficulty) => setConfig({ ...config, difficulty })}
+            />
+          </>
+        )}
         <SessionLengthSelector
           value={config.sessionLength}
           onChange={(sessionLength) => setConfig({ ...config, sessionLength })}

@@ -4,6 +4,8 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import AppProvider from '../app/AppProvider'
 import AppRoutes from '../app/AppRoutes'
+import { saveMistakePatterns } from '../services/practiceStorage'
+import { makePattern } from '../test/factories'
 import type { PracticeAttempt, PracticeSession } from '../types/session'
 
 const session: PracticeSession = {
@@ -110,5 +112,34 @@ describe('SessionSummaryPage', () => {
     renderSummary(undefined)
     expect(screen.getByText(/no session to show/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Start Practice' })).toBeInTheDocument()
+  })
+})
+
+describe('SessionSummaryPage practice mistakes', () => {
+  it('is unavailable with a note when there is nothing to review', () => {
+    renderSummary({ session, attempts: [] })
+    expect(screen.getByRole('button', { name: 'Practice Mistakes' })).toBeDisabled()
+    expect(screen.getByText('No mistakes to review right now.')).toBeInTheDocument()
+  })
+
+  it('links to a review session when mistakes exist', () => {
+    saveMistakePatterns([makePattern()])
+    renderSummary({ session, attempts: [] })
+    expect(screen.getByRole('link', { name: 'Practice Mistakes' })).toHaveAttribute(
+      'href',
+      '/practice/session',
+    )
+    expect(screen.queryByText('No mistakes to review right now.')).not.toBeInTheDocument()
+  })
+
+  it('describes a review session by its source of questions', () => {
+    renderSummary({
+      session: { ...session, mode: 'mistake-review' },
+      attempts: [attempt('mistake-review', 1), attempt('mistake-review', 2)],
+    })
+    expect(screen.getByText('Based on your mistakes')).toBeInTheDocument()
+    expect(screen.getByText('Mistake review questions:').parentElement).toHaveTextContent(
+      'Mistake review questions: 2',
+    )
   })
 })

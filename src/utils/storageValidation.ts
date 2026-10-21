@@ -34,7 +34,8 @@ export function isStoredAttempt(value: unknown): value is PracticeAttempt {
     isDifficultyLevel(value.difficulty) &&
     (value.source === 'regular' || value.source === 'mistake-review') &&
     isTimestamp(value.attemptedAt) &&
-    isString(value.sessionId)
+    isString(value.sessionId) &&
+    (value.mistakePatternId === undefined || isString(value.mistakePatternId))
   )
 }
 
@@ -49,6 +50,7 @@ export function isStoredSession(value: unknown): value is PracticeSession {
     value.operations.every(isMathOperation) &&
     isDifficultyLevel(value.difficulty) &&
     isSessionLength(value.sessionLength) &&
+    (value.mode === undefined || value.mode === 'regular' || value.mode === 'mistake-review') &&
     isCount(value.attempted) &&
     isCount(value.correct) &&
     isCount(value.incorrect)

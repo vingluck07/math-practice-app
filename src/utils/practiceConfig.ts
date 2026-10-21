@@ -47,6 +47,9 @@ export const SESSION_LENGTH_OPTIONS: SessionLengthOption[] = [
   { value: 'continuous', label: 'Continuous', description: 'Keep going until you stop' },
 ]
 
+/** Correct similar questions needed before a mistake counts as mastered (changeable in Settings). */
+export const DEFAULT_MASTERY_THRESHOLD = 3
+
 export const DEFAULT_PRACTICE_CONFIG: PracticeConfig = {
   operations: ['addition'],
   difficulty: 1,

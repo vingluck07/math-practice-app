@@ -1,4 +1,5 @@
 import type { AppSettings } from '../types/settings'
+import { DEFAULT_MASTERY_THRESHOLD } from './practiceConfig'
 
 export const DEFAULT_SETTINGS: AppSettings = {
   soundEffectsEnabled: true,
@@ -7,5 +8,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultSessionLength: 10,
   defaultDifficulty: 1,
   defaultOperations: ['addition'],
-  masteryThreshold: 3,
+  masteryThreshold: DEFAULT_MASTERY_THRESHOLD,
 }

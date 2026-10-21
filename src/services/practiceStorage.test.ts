@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { makeAttempt as makeTestAttempt, makeSession as makeTestSession } from '../test/factories'
+import {
+  makePattern,
+  makeAttempt as makeTestAttempt,
+  makeSession as makeTestSession,
+} from '../test/factories'
 import { fillStorage } from '../test/storageHelpers'
 import type { PracticeAttempt, PracticeSession } from '../types/session'
 import {
@@ -9,6 +13,7 @@ import {
   MAX_STORED_SESSIONS,
   loadAttempts,
   loadMistakePatterns,
+  saveMistakePatterns,
   loadSessions,
   repairMistakePatterns,
   saveAttempt,
@@ -363,5 +368,81 @@ describe('mistake pattern storage', () => {
   it('reports a failed save', () => {
     fillStorage()
     expect(wrong().ok).toBe(false)
+  })
+})
+
+describe('mistake review progress storage', () => {
+  const config = {
+    operations: ['addition' as const],
+    difficulty: 1 as const,
+    sessionLength: 10,
+    mode: 'mistake-review' as const,
+  }
+  const reviewQuestion = {
+    id: 'r1',
+    operation: 'addition' as const,
+    firstOperand: 5,
+    secondOperand: 6,
+    displayText: '5 + 6 = ?',
+    correctAnswer: 11,
+    choices: [10, 11, 12, 13],
+    difficulty: 1 as const,
+    source: 'mistake-review' as const,
+    mistakePatternId: 'addition:3:4',
+  }
+
+  function review(selected: number, threshold?: number) {
+    const start = startSession(config, reviewQuestion)
+    return saveProgress(start, recordResult(start, true, selected), threshold)
+  }
+  const stored = () => loadMistakePatterns().find((p) => p.id === 'addition:3:4')
+
+  it('saves which pattern each review attempt came from', () => {
+    saveMistakePatterns([makePattern()])
+    review(11)
+    expect(loadAttempts()[0]).toMatchObject({
+      source: 'mistake-review',
+      mistakePatternId: 'addition:3:4',
+    })
+  })
+
+  it('counts correct review answers and stores mastery after three', () => {
+    saveMistakePatterns([makePattern()])
+    review(11)
+    review(11)
+    expect(stored()).toMatchObject({ similarCorrectCount: 2, mastered: false })
+    review(11)
+    expect(stored()).toMatchObject({ similarCorrectCount: 3, mastered: true })
+  })
+
+  it('uses the mastery threshold it is given', () => {
+    saveMistakePatterns([makePattern()])
+    review(11, 1)
+    expect(stored()?.mastered).toBe(true)
+  })
+
+  it('resets progress after a wrong review answer and records the new mistake', () => {
+    saveMistakePatterns([makePattern({ similarCorrectCount: 2 })])
+    review(10)
+    expect(stored()).toMatchObject({ similarCorrectCount: 0, mastered: false })
+    expect(loadMistakePatterns().some((p) => p.id === 'addition:5:6')).toBe(true)
+  })
+
+  it('brings a mastered pattern back after it is missed again', () => {
+    saveMistakePatterns([makePattern({ mastered: true, similarCorrectCount: 3 })])
+    const start = startSession(
+      { ...config, mode: undefined },
+      {
+        ...reviewQuestion,
+        source: 'regular',
+        mistakePatternId: undefined,
+        firstOperand: 3,
+        secondOperand: 4,
+        correctAnswer: 7,
+        choices: [6, 7, 8, 9],
+      },
+    )
+    saveProgress(start, recordResult(start, true, 8))
+    expect(stored()).toMatchObject({ mastered: false, similarCorrectCount: 0, incorrectCount: 2 })
   })
 })

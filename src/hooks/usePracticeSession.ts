@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
+import { useSettings } from '../app/settingsContext'
 import { useStorageStatus } from '../app/storageStatusContext'
 import { generateNextQuestion, generateRandomQuestion } from '../services/questionGenerator'
-import { saveProgress } from '../services/practiceStorage'
+import { loadMistakePatterns, saveProgress } from '../services/practiceStorage'
+import { generateReviewQuestion, reviewSessionConfig } from '../services/reviewQuestions'
 import {
   advance,
   endSession,
@@ -12,8 +14,13 @@ import {
 } from '../services/practiceSession'
 import type { PracticeConfig, PracticeSessionState } from '../types/session'
 
-function createSession(config: PracticeConfig): PracticeSessionState | null {
+function createSession(config: PracticeConfig, threshold: number): PracticeSessionState | null {
   try {
+    if (config.mode === 'mistake-review') {
+      const patterns = loadMistakePatterns()
+      const first = generateReviewQuestion(patterns, undefined, { threshold })
+      return first ? startSession(reviewSessionConfig(patterns, config, first), first) : null
+    }
     return startSession(config, generateRandomQuestion(config.operations, config.difficulty))
   } catch {
     return null
@@ -22,7 +29,9 @@ function createSession(config: PracticeConfig): PracticeSessionState | null {
 
 /** Runs one practice session: the current question, recorded attempts and progress. */
 export function usePracticeSession(config: PracticeConfig) {
-  const [state, setState] = useState(() => createSession(config))
+  const { settings } = useSettings()
+  const threshold = settings.masteryThreshold
+  const [state, setState] = useState(() => createSession(config, threshold))
   const [nextFailed, setNextFailed] = useState(false)
   const { reportStorageProblem } = useStorageStatus()
 
@@ -33,7 +42,7 @@ export function usePracticeSession(config: PracticeConfig) {
   function commit(next: PracticeSessionState) {
     const previous = latest.current
     if (!previous || next === previous) return
-    if (!saveProgress(previous, next).ok) reportStorageProblem()
+    if (!saveProgress(previous, next, threshold).ok) reportStorageProblem()
     latest.current = next
     setState(next)
   }
@@ -54,9 +63,12 @@ export function usePracticeSession(config: PracticeConfig) {
       const current = latest.current
       if (!current) return
       try {
+        // In a review session, a null question (nothing left to review) ends the session.
         const nextQuestion = isLastQuestion(current)
           ? null
-          : generateNextQuestion(config.operations, config.difficulty, current.currentQuestion)
+          : config.mode === 'mistake-review'
+            ? generateReviewQuestion(loadMistakePatterns(), current.currentQuestion, { threshold })
+            : generateNextQuestion(config.operations, config.difficulty, current.currentQuestion)
         commit(advance(current, nextQuestion))
       } catch {
         setNextFailed(true)

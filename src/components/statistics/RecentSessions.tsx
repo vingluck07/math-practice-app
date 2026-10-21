@@ -42,7 +42,9 @@ export default function RecentSessions({ sessions }: { sessions: SessionSummary[
               </span>
             </div>
             <p className="session__what">
-              {operations} · Level {s.difficulty} ({level?.label})
+              {s.isReview
+                ? `Mistake review · ${operations}`
+                : `${operations} · Level ${s.difficulty} (${level?.label})`}
             </p>
             <p className="session__counts">
               {s.attempted} {s.attempted === 1 ? 'question' : 'questions'} · {s.correct} correct ·{' '}

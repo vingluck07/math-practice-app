@@ -119,7 +119,7 @@ export function isValidQuestion(question: Question): boolean {
 /** Checks setup data that arrives through navigation, which could be missing or malformed. */
 export function isValidPracticeConfig(value: unknown): value is PracticeConfig {
   if (typeof value !== 'object' || value === null) return false
-  const { operations, difficulty, sessionLength } = value as Record<string, unknown>
+  const { operations, difficulty, sessionLength, mode } = value as Record<string, unknown>
   const lengthOk =
     sessionLength === 'continuous' ||
     (typeof sessionLength === 'number' &&
@@ -131,6 +131,7 @@ export function isValidPracticeConfig(value: unknown): value is PracticeConfig {
     operations.length > 0 &&
     operations.every(isMathOperation) &&
     isDifficultyLevel(difficulty) &&
+    (mode === undefined || mode === 'regular' || mode === 'mistake-review') &&
     lengthOk
   )
 }

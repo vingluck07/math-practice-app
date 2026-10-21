@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Button, ButtonLink } from '../components/common/Button'
 import Panel from '../components/common/Panel'
 import StatTile from '../components/common/StatTile'
+import { activePatterns } from '../services/mistakeService'
+import { loadMistakePatterns } from '../services/practiceStorage'
 import type { PracticeAttempt, PracticeConfig, PracticeSession } from '../types/session'
 import { calculateAccuracy, encouragement } from '../utils/accuracy'
 import { DIFFICULTY_OPTIONS, OPERATION_OPTIONS } from '../utils/practiceConfig'
@@ -14,6 +17,7 @@ interface SummaryState {
 
 export default function SessionSummaryPage() {
   const { session, attempts = [] } = (useLocation().state as SummaryState | null) ?? {}
+  const [activeMistakes] = useState(() => activePatterns(loadMistakePatterns()).length)
 
   if (!session) {
     return (
@@ -42,6 +46,12 @@ export default function SessionSummaryPage() {
     operations: session.operations,
     difficulty: session.difficulty,
     sessionLength: session.sessionLength,
+    ...(session.mode ? { mode: session.mode } : {}),
+  }
+  const isReview = session.mode === 'mistake-review'
+  const mistakesConfig: PracticeConfig = {
+    ...sameSettings,
+    mode: 'mistake-review',
   }
 
   return (
@@ -63,7 +73,7 @@ export default function SessionSummaryPage() {
         <div>
           <dt>Level:</dt>{' '}
           <dd>
-            {session.difficulty} ({difficulty?.label})
+            {isReview ? 'Based on your mistakes' : `${session.difficulty} (${difficulty?.label})`}
           </dd>
         </div>
         <div>
@@ -75,10 +85,15 @@ export default function SessionSummaryPage() {
         <ButtonLink to="/practice/session" state={{ config: sameSettings }} variant="accent">
           Practice Again
         </ButtonLink>
-        {/* Mistake review is built later; keep the button visible but unavailable for now. */}
-        <Button variant="secondary" disabled aria-describedby="mistakes-note">
-          Practice Mistakes
-        </Button>
+        {activeMistakes > 0 ? (
+          <ButtonLink to="/practice/session" state={{ config: mistakesConfig }} variant="secondary">
+            Practice Mistakes
+          </ButtonLink>
+        ) : (
+          <Button variant="secondary" disabled aria-describedby="mistakes-note">
+            Practice Mistakes
+          </Button>
+        )}
         <ButtonLink to="/practice/setup" variant="primary">
           Change Settings
         </ButtonLink>
@@ -89,9 +104,11 @@ export default function SessionSummaryPage() {
           Return Home
         </ButtonLink>
       </div>
-      <p id="mistakes-note" className="summary__note">
-        Practicing mistakes is coming soon.
-      </p>
+      {activeMistakes === 0 && (
+        <p id="mistakes-note" className="summary__note">
+          No mistakes to review right now.
+        </p>
+      )}
     </Panel>
   )
 }

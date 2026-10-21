@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
+import { saveMistakePatterns } from '../services/practiceStorage'
+import { makePattern } from '../test/factories'
 import AppRoutes from '../app/AppRoutes'
 
 function renderSetup() {
@@ -67,5 +69,42 @@ describe('PracticeSetupPage', () => {
     expect(screen.getByText('Question 1 of 20')).toBeInTheDocument()
     // The question uses one of the chosen operations (addition or multiplication).
     expect(screen.getByRole('heading', { name: /plus|times/ })).toBeInTheDocument()
+  })
+})
+
+describe('PracticeSetupPage review mode', () => {
+  it('starts in regular practice and explains why review is unavailable', () => {
+    renderSetup()
+    expect(screen.getByRole('radio', { name: /regular practice/i })).toBeChecked()
+    const review = screen.getByRole('radio', { name: /practice my mistakes/i })
+    expect(review).toBeDisabled()
+    expect(screen.getByText(/get some questions wrong first/i)).toBeInTheDocument()
+  })
+
+  it('shows how many mistakes can be reviewed, ignoring mastered ones', async () => {
+    saveMistakePatterns([
+      makePattern({ id: 'a' }),
+      makePattern({ id: 'b' }),
+      makePattern({ id: 'c', mastered: true }),
+    ])
+    const user = userEvent.setup()
+    renderSetup()
+    expect(screen.getByText('2 mistakes to review')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: /practice my mistakes/i }))
+    expect(screen.getByRole('radio', { name: /practice my mistakes/i })).toBeChecked()
+    expect(screen.queryByRole('checkbox', { name: /addition/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: /beginner/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /10 questions/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Start Session' })).toBeEnabled()
+
+    await user.click(screen.getByRole('radio', { name: /regular practice/i }))
+    expect(screen.getByRole('checkbox', { name: /addition/i })).toBeInTheDocument()
+  })
+
+  it('uses singular wording for one mistake', () => {
+    saveMistakePatterns([makePattern()])
+    renderSetup()
+    expect(screen.getByText('1 mistake to review')).toBeInTheDocument()
   })
 })

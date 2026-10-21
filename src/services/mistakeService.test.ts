@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { makeAttempt } from '../test/factories'
+import { makeAttempt, makePattern } from '../test/factories'
 import type { MistakePattern } from '../types/mistake'
-import { isIncorrectAttempt, mistakePatternId, recordMistake } from './mistakeService'
+import {
+  activePatterns,
+  applyAttempt,
+  isIncorrectAttempt,
+  masteredPatterns,
+  mistakePatternId,
+  recordMistake,
+  recordReviewResult,
+} from './mistakeService'
 
 const miss = (options: Parameters<typeof makeAttempt>[0] = {}) =>
   makeAttempt({ correct: false, ...options })
@@ -69,5 +77,88 @@ describe('recordMistake', () => {
     const snapshot = JSON.parse(JSON.stringify(original))
     recordMistake(original, miss())
     expect(original).toEqual(snapshot)
+  })
+})
+
+const review = (correct: boolean, mistakePatternId = 'addition:3:4') =>
+  makeAttempt({
+    source: 'mistake-review',
+    mistakePatternId,
+    correct,
+    firstOperand: 5,
+    secondOperand: 6,
+  })
+
+describe('recordReviewResult', () => {
+  it('counts a correct answer toward mastery', () => {
+    const [updated] = recordReviewResult([makePattern()], review(true), 3)
+    expect(updated.similarCorrectCount).toBe(1)
+    expect(updated.mastered).toBe(false)
+  })
+
+  it('marks a pattern mastered when the threshold is reached', () => {
+    let patterns = [makePattern()]
+    for (let i = 0; i < 2; i++) patterns = recordReviewResult(patterns, review(true), 3)
+    expect(patterns[0]).toMatchObject({ similarCorrectCount: 2, mastered: false })
+    patterns = recordReviewResult(patterns, review(true), 3)
+    expect(patterns[0]).toMatchObject({ similarCorrectCount: 3, mastered: true })
+  })
+
+  it('uses a configurable threshold', () => {
+    const [two] = recordReviewResult([makePattern({ similarCorrectCount: 1 })], review(true), 2)
+    expect(two.mastered).toBe(true)
+    const [five] = recordReviewResult([makePattern({ similarCorrectCount: 3 })], review(true), 5)
+    expect(five.mastered).toBe(false)
+  })
+
+  it('sends a pattern back to the start after an incorrect review answer', () => {
+    const [updated] = recordReviewResult(
+      [makePattern({ similarCorrectCount: 2 })],
+      review(false),
+      3,
+    )
+    expect(updated).toMatchObject({ similarCorrectCount: 0, mastered: false, incorrectCount: 1 })
+  })
+
+  it('ignores regular attempts, unknown patterns and mastered patterns', () => {
+    const patterns = [makePattern()]
+    expect(recordReviewResult(patterns, makeAttempt(), 3)).toBe(patterns)
+    expect(recordReviewResult(patterns, review(true, 'nope'), 3)).toBe(patterns)
+    const done = [makePattern({ mastered: true, similarCorrectCount: 3 })]
+    expect(recordReviewResult(done, review(true), 3)).toBe(done)
+  })
+
+  it('does not change the list it is given', () => {
+    const patterns = [makePattern()]
+    recordReviewResult(patterns, review(true), 3)
+    expect(patterns[0].similarCorrectCount).toBe(0)
+  })
+})
+
+describe('applyAttempt', () => {
+  it('lets a mastered pattern return after a future mistake', () => {
+    const mastered = makePattern({ mastered: true, similarCorrectCount: 3 })
+    const [back] = applyAttempt([mastered], miss({ firstOperand: 3, secondOperand: 4 }), 3)
+    expect(back).toMatchObject({ mastered: false, similarCorrectCount: 0, incorrectCount: 2 })
+  })
+
+  it('also records a new pattern for a wrong review answer', () => {
+    const next = applyAttempt([makePattern({ similarCorrectCount: 2 })], review(false), 3)
+    expect(next).toHaveLength(2)
+    expect(next.find((p) => p.id === 'addition:3:4')?.similarCorrectCount).toBe(0)
+    expect(next.some((p) => p.id === 'addition:5:6')).toBe(true)
+  })
+
+  it('returns the same list for a correct regular answer', () => {
+    const patterns = [makePattern()]
+    expect(applyAttempt(patterns, makeAttempt(), 3)).toBe(patterns)
+  })
+})
+
+describe('activePatterns and masteredPatterns', () => {
+  it('split patterns by mastery', () => {
+    const list = [makePattern({ id: 'a' }), makePattern({ id: 'b', mastered: true })]
+    expect(activePatterns(list).map((p) => p.id)).toEqual(['a'])
+    expect(masteredPatterns(list).map((p) => p.id)).toEqual(['b'])
   })
 })

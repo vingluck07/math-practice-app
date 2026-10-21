@@ -2,6 +2,9 @@ import type { DifficultyLevel, MathOperation, Question, QuestionSource } from '.
 
 export type SessionLength = number | 'continuous'
 
+/** Regular practice, or questions based on the student's earlier mistakes. */
+export type PracticeMode = 'regular' | 'mistake-review'
+
 export interface PracticeAttempt {
   id: string
   questionId: string
@@ -12,6 +15,8 @@ export interface PracticeAttempt {
   selectedAnswer: number
   /** The student's "how do you think you did?" response, given before the answer was revealed. */
   selfReportedCorrect: boolean
+  /** For mistake-review questions: the mistake pattern the question was made from. */
+  mistakePatternId?: string
   difficulty: DifficultyLevel
   source: QuestionSource
   attemptedAt: string
@@ -25,6 +30,8 @@ export interface PracticeSession {
   operations: MathOperation[]
   difficulty: DifficultyLevel
   sessionLength: SessionLength
+  /** Missing means regular practice. */
+  mode?: PracticeMode
   attempted: number
   /** Questions where the picked answer was the right one. */
   correct: number
@@ -37,6 +44,8 @@ export interface PracticeConfig {
   operations: MathOperation[]
   difficulty: DifficultyLevel
   sessionLength: SessionLength
+  /** Missing means regular practice. */
+  mode?: PracticeMode
 }
 
 /** Everything the practice page needs to run one session. */
