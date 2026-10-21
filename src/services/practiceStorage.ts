@@ -130,6 +130,7 @@ export function clearPracticeHistory(): boolean {
     STORAGE_KEYS.sessions,
     STORAGE_KEYS.mistakePatterns,
     STORAGE_KEYS.statistics,
+    STORAGE_KEYS.activeSession,
   ]
     .map(removeItem)
     .every(Boolean)

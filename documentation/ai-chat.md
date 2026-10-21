@@ -494,3 +494,25 @@ Files added or changed:
 - `src/components/practice/CardBack.tsx`, `QuestionCard.css`, `CardFeedback.test.tsx`: the feedback and its tests.
 - `src/pages/SettingsPage.tsx`, `types/settings.ts`, `defaultSettings.ts`, `storageValidation.ts`: the new setting (older saved settings get it switched on).
 - `Navigation.css`, `Header.css`, `AnswerChoice.css`: small-screen and landscape polish.
+
+## Dialogue 46
+
+**User:** ok move onto phase 8
+
+**Claude:** (Phase 8, the Session Summary, was already done and checked off, so I asked whether Phase 18 was meant.) **User:** Phase 18.
+
+**Claude:** Implemented Phase 18 (Session Recovery and Navigation Safety) and checked off all its items. Lint, build and 431 tests pass. No commit and no new npm packages. I also tried it in a real browser: refreshing mid-session (twice) brings back the same question and the picked answer, and the leave prompt appears for link clicks and the browser Back button.
+
+What it does:
+
+- **Recovery:** the running session is saved after every change (current question, answers so far, and the answer you have picked). Refreshing the page or reopening the app brings it back. If you had already answered the question when the page closed, you land on the next one (or the summary if it was the last). The Home and Setup pages offer "Pick up where you left off?" with Continue Session and Start Fresh. The save is removed when the session ends, is ignored if damaged (only that part is reset), and expires after 24 hours.
+- **Leaving safely:** clicking a link or using the Back button during a running session asks "Leave this session?" with Keep Practicing or End Session and Leave (the answers so far are counted, and you go where you asked). There is no prompt after a session finishes, after End Session, or on other pages. There is no browser "are you sure" popup on refresh or closing the tab, since progress is saved and recovered.
+- To make the prompt possible the app now uses React Router's browser router instead of `BrowserRouter`; the pages and addresses are unchanged.
+
+Files added or changed:
+
+- `src/services/activeSessionStorage.ts`: save, load (with validation and expiry) and clear.
+- `src/utils/storageValidation.ts`, `src/types/session.ts`, `src/services/storageService.ts`, `practiceStorage.ts`: validation, new storage key, included in Reset Statistics and Clear All Data.
+- `src/hooks/usePracticeSession.ts`, `src/pages/PracticePage.tsx`, `QuestionCard.tsx`: saving, restoring and the leave prompt.
+- `src/components/practice/ResumePrompt.tsx` (+ CSS), `HomePage.tsx`, `PracticeSetupPage.tsx`, `src/app/App.tsx`.
+- Tests: `activeSessionStorage.test.ts` and `sessionRecovery.test.tsx`.

@@ -57,3 +57,12 @@ export interface PracticeSessionState {
   attempts: PracticeAttempt[]
   isActive: boolean
 }
+
+/** What is saved while a session is running, so it can be picked up again after a refresh. */
+export interface ActiveSessionRecord {
+  config: PracticeConfig
+  state: PracticeSessionState
+  /** The answer picked on the current question, if any. */
+  selectedAnswer: number | null
+  savedAt: string
+}

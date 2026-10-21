@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../app/settingsContext'
 import { Button } from '../components/common/Button'
+import ResumePrompt from '../components/practice/ResumePrompt'
 import ModeSelector from '../components/practice/ModeSelector'
 import DifficultySelector from '../components/practice/DifficultySelector'
 import OperationSelector from '../components/practice/OperationSelector'
@@ -34,6 +35,7 @@ export default function PracticeSetupPage() {
 
   return (
     <section>
+      <ResumePrompt />
       <h1>Set Up Your Practice</h1>
       <form onSubmit={handleSubmit} noValidate>
         <ModeSelector

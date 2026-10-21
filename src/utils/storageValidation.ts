@@ -1,9 +1,16 @@
 import type { AppSettings } from '../types/settings'
 import type { MistakePattern } from '../types/mistake'
 import type { AppStatistics } from '../types/statistics'
-import type { PracticeAttempt, PracticeSession } from '../types/session'
+import type { ActiveSessionRecord, PracticeAttempt, PracticeSession } from '../types/session'
 import { DEFAULT_SETTINGS } from './defaultSettings'
-import { DIFFICULTY_LEVELS, OPERATIONS, isDifficultyLevel, isMathOperation } from './validation'
+import {
+  DIFFICULTY_LEVELS,
+  OPERATIONS,
+  isDifficultyLevel,
+  isMathOperation,
+  isValidPracticeConfig,
+  isValidQuestion,
+} from './validation'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -71,6 +78,28 @@ export function isStoredMistakePattern(value: unknown): value is MistakePattern 
     isCount(value.similarCorrectCount) &&
     isTimestamp(value.lastIncorrectAt) &&
     typeof value.mastered === 'boolean'
+  )
+}
+
+/** Checks a saved in-progress session, so a damaged one is ignored instead of crashing the app. */
+export function isStoredActiveSession(value: unknown): value is ActiveSessionRecord {
+  if (!isRecord(value) || !isValidPracticeConfig(value.config)) return false
+  const { state, selectedAnswer, savedAt } = value
+  if (!isRecord(state) || !isTimestamp(savedAt)) return false
+  if (selectedAnswer !== null && !isFiniteNumber(selectedAnswer)) return false
+  const { session, currentQuestion, currentQuestionIndex, attempts } = state
+  return (
+    state.isActive === true &&
+    isStoredSession(session) &&
+    isRecord(currentQuestion) &&
+    isString(currentQuestion.id) &&
+    (currentQuestion.source === 'regular' || currentQuestion.source === 'mistake-review') &&
+    isValidQuestion(currentQuestion as never) &&
+    isCount(currentQuestionIndex) &&
+    Array.isArray(attempts) &&
+    attempts.every(isStoredAttempt) &&
+    attempts.length === session.attempted &&
+    (selectedAnswer === null || (currentQuestion.choices as unknown[]).includes(selectedAnswer))
   )
 }
 

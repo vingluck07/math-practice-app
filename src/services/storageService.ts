@@ -12,6 +12,7 @@ export const STORAGE_KEYS = {
   attempts: `${STORAGE_PREFIX}attempts`,
   mistakePatterns: `${STORAGE_PREFIX}mistakePatterns`,
   statistics: `${STORAGE_PREFIX}statistics`,
+  activeSession: `${STORAGE_PREFIX}activeSession`,
   version: `${STORAGE_PREFIX}version`,
 } as const
 

@@ -11,6 +11,10 @@ interface QuestionCardProps {
   total: SessionLength
   /** When false, the card switches sides instantly with no animation. */
   animate?: boolean
+  /** An answer to show as already picked (used when a session is restored). */
+  initialSelectedAnswer?: number | null
+  /** Called whenever the student picks an answer. */
+  onSelect?: (answer: number) => void
   /** The student's confidence check (before the answer is revealed). */
   onResult: (gotItRight: boolean, selectedAnswer: number) => void
   /** The student is ready for the next question (after the answer is revealed). */
@@ -34,11 +38,17 @@ export default function QuestionCard({
   questionNumber,
   total,
   animate = true,
+  initialSelectedAnswer = null,
+  onSelect,
   onResult,
   onNext,
   nextLabel,
 }: QuestionCardProps) {
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(
+    initialSelectedAnswer !== null && question.choices.includes(initialSelectedAnswer)
+      ? initialSelectedAnswer
+      : null,
+  )
   const [isCardFlipped, setIsCardFlipped] = useState(false)
   const frontHeading = useRef<HTMLHeadingElement>(null)
   const backFace = useRef<HTMLDivElement>(null)
@@ -51,6 +61,11 @@ export default function QuestionCard({
     target?.focus({ preventScroll: true })
   }, [isCardFlipped])
 
+  function select(value: number) {
+    setSelectedAnswer(value)
+    onSelect?.(value)
+  }
+
   // Number keys 1–4 pick an answer until the card is flipped.
   useEffect(() => {
     if (isCardFlipped) return
@@ -58,14 +73,15 @@ export default function QuestionCard({
       if (event.ctrlKey || event.metaKey || event.altKey) return
       if (isTypingTarget(event.target) || document.querySelector('[role="dialog"]')) return
       const choice = question.choices[Number(event.key) - 1]
-      if (choice !== undefined) setSelectedAnswer(choice)
+      if (choice !== undefined) select(choice)
     }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCardFlipped, question.choices])
 
   function handleSelect(value: number) {
-    if (!isCardFlipped) setSelectedAnswer(value)
+    if (!isCardFlipped) select(value)
   }
 
   function handleFlip() {
