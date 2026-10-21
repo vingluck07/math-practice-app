@@ -535,3 +535,17 @@ Files added or changed:
 - `src/components/common/ErrorMessage.tsx`, `ErrorBoundary.tsx`, `RouteError.tsx`, `StorageWarning.tsx`, `app/storageStatusContext.ts`, `AppProvider.tsx`, `App.tsx`, `main.tsx`.
 - `NotFoundPage.tsx`, `PracticePage.tsx`, `PracticeSetupPage.tsx`, `SessionSummaryPage.tsx`.
 - Tests: `dataRepair`, `fallbackQuestions`, `questionGenerator`, `ErrorBoundary`, `StorageWarning`, `PracticePageError`, `App`.
+
+## Dialogue 48
+
+**User:** looks good, move onto phase 20
+
+**Claude:** Implemented Phase 20 (Testing). The existing suite already covered most unit and component items, so I audited it and filled the gaps. Lint, tsc and 473 tests pass (two runs). One new dev dependency: `axe-core` (automated accessibility checker). No commit.
+
+Added:
+
+- **Integration tests** (`src/app/integration.test.tsx`): a full addition session from the home page, a mixed-operation session, continuous practice, a wrong answer becoming a mistake pattern then a review session ending in mastery, and statistics surviving a reopen then Reset Statistics.
+- **Accessibility:** a keyboard-only full session test, an axe check of every page, and a real-browser axe run (including contrast) at desktop, 200% and 400% zoom widths and with reduced motion. It found one real issue: the answer buttons' visible text (key number, check mark) was not part of their accessible name. Fixed by drawing those with CSS in `AnswerChoice`.
+- **Screen reader:** I can't run one, so `documentation/accessibility-testing.md` has a short NVDA checklist; that one item stays unchecked.
+
+Files: `src/test/practiceHelpers.tsx`, `src/app/integration.test.tsx`, `keyboardSession.test.tsx`, `axe.test.tsx`, `components/practice/AnswerChoice.tsx` and `.css`, `accessibility.test.tsx`, `package.json`, `package-lock.json`, `documentation/accessibility-testing.md`.

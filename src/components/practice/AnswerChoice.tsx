@@ -27,15 +27,13 @@ export default function AnswerChoice({
       disabled={locked}
       onClick={() => onSelect(value)}
     >
-      <span className="answer__key" aria-hidden="true">
-        {position}
-      </span>
+      {/* The key number and check mark are drawn by CSS, so the button's visible text is
+          just the answer, which its accessible name ("Answer 1: 4") then contains. */}
+      <span className="answer__key" data-text={position} aria-hidden="true" />
       <span className="answer__value" aria-hidden="true">
         {value}
       </span>
-      <span className="answer__check" aria-hidden="true">
-        ✓
-      </span>
+      <span className="answer__check" data-text="✓" aria-hidden="true" />
     </button>
   )
 }

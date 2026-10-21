@@ -307,7 +307,7 @@ describe('visual accessibility', () => {
     expect(first).toHaveAttribute('aria-pressed', 'false')
     await user.click(first)
     expect(first).toHaveAttribute('aria-pressed', 'true')
-    expect(first.textContent).toContain('✓')
+    expect(first.querySelector('.answer__check')).toHaveAttribute('data-text', '✓')
   })
 
   it('says whether the answer was right in words as well as style', async () => {
