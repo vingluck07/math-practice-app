@@ -393,3 +393,22 @@ Files added or changed:
 - `src/utils/storageValidation.ts`: checks stored patterns.
 - `src/app/AppProvider.tsx`: repairs saved patterns at start-up.
 - Tests: `mistakeService.test.ts`, new cases in `practiceStorage.test.ts` and `persistence.test.tsx`; `test/factories.ts` accepts operands.
+
+## Dialogue 41
+
+**User:** looks good, please implement phase 13
+
+**Claude:** Implemented Phase 13 (Similar Question Generation) and checked off all its items. Lint, build and 292 tests pass (repeated runs stable). No commit and no new npm packages. Nothing changes on screen yet; Phase 14 will use this to run mistake-review sessions.
+
+What it does: `generateSimilarQuestion(pattern)` makes a related question from a mistake pattern. It picks one of three strategies at random and falls back to the others if one has nothing valid:
+
+- Nearby numbers: the same operation with operands changed by 1 or 2 (division changes the divisor or quotient and rebuilds the dividend). Example: 8 × 7 gives 8 × 6 or 9 × 7.
+- Reversed operands: addition and multiplication only (8 × 7 gives 7 × 8). Reversed subtraction and division are never treated as the same question.
+- Fact family: multiplication to division, division to multiplication, addition to subtraction, subtraction to addition (8 × 7 gives 56 ÷ 7 or 56 ÷ 8).
+
+Every question is checked against the mistake's own difficulty range (no negative subtraction, no division by zero, whole-number division), never equals the original question or the one shown just before, is labelled `mistake-review` and carries the pattern's ID. If nothing different exists, the original question is asked again.
+
+Files added:
+
+- `src/services/similarQuestions.ts`: the strategies and `generateSimilarQuestion`.
+- `src/services/similarQuestions.test.ts`: tests for every operation, strategy and level.
