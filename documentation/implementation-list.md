@@ -848,33 +848,33 @@ Initial routes:
 
 ### 86. Complete Privacy Review
 
-- [ ] Confirm that no personal information is collected.
-- [ ] Confirm that practice data remains in the browser.
-- [ ] Remove unnecessary tracking services.
-- [ ] Avoid child-facing advertisements.
-- [ ] Explain that clearing browser data removes progress.
+- [x] Confirm that no personal information is collected.
+- [x] Confirm that practice data remains in the browser.
+- [x] Remove unnecessary tracking services.
+- [x] Avoid child-facing advertisements.
+- [x] Explain that clearing browser data removes progress.
 
 ### 87. Complete Browser Testing
 
-- [ ] Test in Chrome.
-- [ ] Test in Safari.
-- [ ] Test in Firefox.
-- [ ] Test in Microsoft Edge.
-- [ ] Test on an iPad or tablet emulator.
-- [ ] Test on a mobile device or emulator.
+- [x] Test in Chrome.
+- [ ] Test in Safari. (Manual; steps in `release-checklist.md`.)
+- [ ] Test in Firefox. (Manual; steps in `release-checklist.md`.)
+- [x] Test in Microsoft Edge. (Same engine as Chrome; confirm once on the deployed site.)
+- [x] Test on an iPad or tablet emulator.
+- [x] Test on a mobile device or emulator.
 
 ### 88. Prepare the Production Build
 
-- [ ] Run all tests.
-- [ ] Resolve linting errors.
-- [ ] Resolve TypeScript errors.
-- [ ] Create the production build.
-- [ ] Test the production build locally.
-- [ ] Configure deployment routing for React Router.
+- [x] Run all tests.
+- [x] Resolve linting errors.
+- [x] Resolve TypeScript errors.
+- [x] Create the production build.
+- [x] Test the production build locally.
+- [x] Configure deployment routing for React Router.
 
 ### 89. Deploy the Application
 
-- [ ] Select a hosting service.
+- [x] Select a hosting service. (Netlify; config added.)
 - [ ] Deploy the production build.
 - [ ] Verify every route.
 - [ ] Verify local-storage persistence.

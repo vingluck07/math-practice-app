@@ -122,6 +122,21 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      <section className="setup-group settings__privacy" aria-labelledby="privacy-heading">
+        <h2 id="privacy-heading" className="settings__heading">
+          Privacy
+        </h2>
+        <p>
+          This app does not ask for your name or any personal information, has no accounts, no
+          tracking and no ads. Your practice history and settings are saved only in this browser on
+          this device and are never sent anywhere.
+        </p>
+        <p>
+          Clearing your browser data (or using a private window) removes your progress. You can also
+          erase it yourself with the button above.
+        </p>
+      </section>
+
       <p className="settings__back">
         <ButtonLink to="/" variant="secondary">
           Back to Home

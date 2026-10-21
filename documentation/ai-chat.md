@@ -565,3 +565,19 @@ What changed:
 - **Loading:** Statistics and Settings pages load on demand and are fetched in the background after the first page appears. Main bundle 364 KB (114 KB gzipped). Latin-only font. On a throttled browser (6x CPU, slow network) the home page is ready in about 1.4 s and statistics with 5,000 attempts opens in under 0.7 s, with no console errors.
 
 Files: `src/app/lazyPage.tsx`, `lazyPages.ts`, `AppRoutes.tsx`, `main.tsx`, `index.css`, `assets/fonts/*`, `services/storageService.ts` (`getStorageUsage`), `utils/formatUsage.ts`, `pages/SettingsPage.tsx`, memoized components, `QuestionCard.tsx`, `MistakeDetails.tsx`, `test/setup.ts`, tests (`largeHistory`, `renders`, `lazyPage`, `formatUsage`), `documentation/performance-notes.md`, `package.json`, `package-lock.json`.
+
+## Dialogue 50
+
+**User:** great move onto 22
+
+**Claude:** (I asked which host to prepare for; **User:** Netlify.) Implemented as much of Phase 22 (Release Preparation) as can be done from here. Lint, tsc, format check, build and 485 tests pass. No commit and no new packages.
+
+Done:
+
+- **Privacy:** confirmed no personal data, no network requests, no tracking or ads. Added a Privacy section to Settings (nothing collected, data stays in this browser, clearing browser data removes progress).
+- **Browser testing:** Chromium (Chrome/Edge engine), iPad-sized tablet in both orientations, phone and small phone, all with touch emulation: every route, direct links, refresh, a full session, persistence, no overflow, no console messages, no outside requests, with the production security headers applied.
+- **Production build:** `npm run verify` (lint, format check, tests, build). `netlify.toml` has the build settings, the React Router redirect and security headers. README has privacy and deploy steps.
+
+Not possible from here (left unchecked): Firefox and Safari runs (only Chromium is available), and deploying and verifying the live site. `documentation/release-checklist.md` has the manual steps.
+
+Files: `src/pages/SettingsPage.tsx` and test, `netlify.toml`, `index.html`, `package.json` (`verify` script), `README.md`, `documentation/release-checklist.md`.

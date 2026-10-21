@@ -126,3 +126,14 @@ describe('SettingsPage', () => {
     })
   })
 })
+
+describe('SettingsPage privacy note', () => {
+  it('explains that nothing is collected and that clearing browser data removes progress', () => {
+    renderApp('/settings')
+    const privacy = screen.getByRole('region', { name: 'Privacy' })
+    expect(privacy).toHaveTextContent(/any personal information/i)
+    expect(privacy).toHaveTextContent(/no accounts, no tracking and no ads/i)
+    expect(privacy).toHaveTextContent(/saved only in this browser/i)
+    expect(privacy).toHaveTextContent(/clearing your browser data/i)
+  })
+})
