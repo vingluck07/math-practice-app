@@ -516,3 +516,22 @@ Files added or changed:
 - `src/hooks/usePracticeSession.ts`, `src/pages/PracticePage.tsx`, `QuestionCard.tsx`: saving, restoring and the leave prompt.
 - `src/components/practice/ResumePrompt.tsx` (+ CSS), `HomePage.tsx`, `PracticeSetupPage.tsx`, `src/app/App.tsx`.
 - Tests: `activeSessionStorage.test.ts` and `sessionRecovery.test.tsx`.
+
+## Dialogue 47
+
+**User:** great, move onto phase 19
+
+**Claude:** Implemented Phase 19 (Error Handling) and checked off all its items. Lint, tsc, build and 459 tests pass (two full runs). No commit and no new npm packages.
+
+What it does:
+
+- **Invalid stored data:** at start-up each saved section (settings, sessions, attempts, mistake patterns, statistics, saved session) is checked on its own. Only a damaged section is fixed: lists drop their bad entries, settings fall back to defaults, statistics are rebuilt from attempts, a damaged saved session is removed. Healthy sections are never touched and nothing crashes.
+- **Question generation:** every question is still validated and retried up to 5 times. If that fails, a simple built-in question (valid for every operation and level) is used so practice never stops. Problems are logged to the console in development only.
+- **Friendly errors:** a reusable error component; an error boundary and a route error page for unexpected crashes (no stack traces, "Back to Home" button); storage warnings now say why (browser blocking saving, storage full, or other); opening the practice page with nothing set up sends you to Setup with an explanation; the summary page explains when there is no session.
+
+Files added or changed:
+
+- `src/utils/logger.ts`, `services/fallbackQuestions.ts`, `services/dataRepair.ts`, `services/questionGenerator.ts` (`generateQuestionSafely`), `hooks/usePracticeSession.ts`.
+- `src/components/common/ErrorMessage.tsx`, `ErrorBoundary.tsx`, `RouteError.tsx`, `StorageWarning.tsx`, `app/storageStatusContext.ts`, `AppProvider.tsx`, `App.tsx`, `main.tsx`.
+- `NotFoundPage.tsx`, `PracticePage.tsx`, `PracticeSetupPage.tsx`, `SessionSummaryPage.tsx`.
+- Tests: `dataRepair`, `fallbackQuestions`, `questionGenerator`, `ErrorBoundary`, `StorageWarning`, `PracticePageError`, `App`.

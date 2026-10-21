@@ -1,8 +1,10 @@
 import type { DifficultyLevel, MathOperation, Question } from '../types/question'
+import { logDevError, logDevWarning } from '../utils/logger'
 import { pickRandom } from '../utils/math'
 import { getQuestionErrors, isDifficultyLevel, isMathOperation } from '../utils/validation'
 import { buildChoices } from './distractors'
 import { QuestionGenerationError } from './errors'
+import { createFallbackQuestion } from './fallbackQuestions'
 import { generateAddition } from './generators/addition'
 import { generateDivision } from './generators/division'
 import { generateMultiplication } from './generators/multiplication'
@@ -45,6 +47,7 @@ export function generateQuestion(
     const question = { ...problem, choices: buildChoices(problem, { rng: options.rng }) }
     errors = getQuestionErrors(question)
     if (errors.length === 0) return question
+    logDevWarning(`Discarded an invalid ${operation} question (attempt ${attempt + 1}).`, errors)
   }
   throw new QuestionGenerationError(
     `Could not generate a valid ${operation} question: ${errors.join(' ')}`,
@@ -86,4 +89,22 @@ export function generateNextQuestion(
     question = generateRandomQuestion(operations, difficulty, options)
   }
   return question
+}
+
+/**
+ * Never fails: if no valid question can be made (after the retries inside
+ * `generateQuestion`), logs the problem and returns a simple built-in question.
+ */
+export function generateQuestionSafely(
+  operations: readonly MathOperation[],
+  difficulty: DifficultyLevel,
+  previous?: Question,
+  options: GeneratorOptions = {},
+): Question {
+  try {
+    return generateNextQuestion(operations, difficulty, previous, options)
+  } catch (error) {
+    logDevError('Question generation failed; using a fallback question.', error)
+    return createFallbackQuestion(operations, difficulty)
+  }
 }

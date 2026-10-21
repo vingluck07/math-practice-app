@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useSettings } from '../app/settingsContext'
 import { Button } from '../components/common/Button'
 import ResumePrompt from '../components/practice/ResumePrompt'
@@ -14,6 +14,7 @@ import './PracticeSetupPage.css'
 
 export default function PracticeSetupPage() {
   const navigate = useNavigate()
+  const notice = (useLocation().state as { notice?: string } | null)?.notice
   const { settings } = useSettings()
   // Start from the saved defaults; changes here only affect this session.
   const [config, setConfig] = useState<PracticeConfig>(() => ({
@@ -37,6 +38,11 @@ export default function PracticeSetupPage() {
     <section>
       <ResumePrompt />
       <h1>Set Up Your Practice</h1>
+      {notice === 'no-session' && (
+        <p className="setup-note" role="status">
+          We didn&apos;t have a practice ready to show, so choose your settings to start a new one.
+        </p>
+      )}
       <form onSubmit={handleSubmit} noValidate>
         <ModeSelector
           value={config.mode ?? 'regular'}

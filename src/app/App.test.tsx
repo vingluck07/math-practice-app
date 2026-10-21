@@ -39,6 +39,7 @@ describe('AppRoutes', () => {
   it('sends /practice/session without setup data back to the setup page', () => {
     renderAt('/practice/session')
     expect(screen.getByRole('heading', { name: 'Set Up Your Practice' })).toBeInTheDocument()
+    expect(screen.getByText(/choose your settings to start a new one/i)).toBeInTheDocument()
   })
 
   it('shows a fallback page for unknown routes', () => {

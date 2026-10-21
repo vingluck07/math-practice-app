@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom'
 import { useSettings } from '../app/settingsContext'
 import { Button, ButtonLink } from '../components/common/Button'
+import ErrorMessage from '../components/common/ErrorMessage'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import ProgressBar from '../components/practice/ProgressBar'
 import QuestionCard from '../components/practice/QuestionCard'
@@ -85,13 +86,17 @@ function ActiveSession({
 
   if (practice.failed || !state) {
     return (
-      <section>
-        <h1>Oops!</h1>
-        <p>We had trouble making a question. Let&apos;s try setting up again.</p>
+      <ErrorMessage
+        title="Oops!"
+        message="We had trouble making a question. Let's try setting up again."
+      >
         <ButtonLink to="/practice/setup" variant="accent">
           Back to Practice Setup
         </ButtonLink>
-      </section>
+        <ButtonLink to="/" variant="secondary">
+          Back to Home
+        </ButtonLink>
+      </ErrorMessage>
     )
   }
 
@@ -175,7 +180,7 @@ export default function PracticePage() {
 
   // No valid setup (for example, the page was opened directly): go choose settings.
   if (!isValidPracticeConfig(state.config)) {
-    return <Navigate to="/practice/setup" replace />
+    return <Navigate to="/practice/setup" replace state={{ notice: 'no-session' }} />
   }
   return <ActiveSession config={state.config} runId={state.runId} />
 }

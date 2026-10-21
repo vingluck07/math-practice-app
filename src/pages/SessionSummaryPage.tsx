@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Button, ButtonLink } from '../components/common/Button'
+import ErrorMessage from '../components/common/ErrorMessage'
 import Panel from '../components/common/Panel'
 import StatTile from '../components/common/StatTile'
 import { activePatterns } from '../services/mistakeService'
@@ -21,18 +22,17 @@ export default function SessionSummaryPage() {
 
   if (!session) {
     return (
-      <Panel className="summary">
-        <h1>Session Summary</h1>
-        <p className="summary__text">There is no session to show yet.</p>
-        <div className="panel__actions">
-          <ButtonLink to="/practice/setup" variant="accent">
-            Start Practice
-          </ButtonLink>
-          <ButtonLink to="/" variant="secondary">
-            Return Home
-          </ButtonLink>
-        </div>
-      </Panel>
+      <ErrorMessage
+        title="Session Summary"
+        message="There is no session to show right now. Start a new practice to see your results here."
+      >
+        <ButtonLink to="/practice/setup" variant="accent">
+          Start Practice
+        </ButtonLink>
+        <ButtonLink to="/" variant="secondary">
+          Return Home
+        </ButtonLink>
+      </ErrorMessage>
     )
   }
 

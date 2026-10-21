@@ -6,6 +6,7 @@ import {
   QuestionGenerationError,
   generateQuestion,
   generateNextQuestion,
+  generateQuestionSafely,
   generateRandomQuestion,
 } from './questionGenerator'
 
@@ -82,5 +83,21 @@ describe('generateNextQuestion', () => {
 
   it('works without a previous question', () => {
     expect(generateNextQuestion(['addition'], 1).operation).toBe('addition')
+  })
+})
+
+describe('generateQuestionSafely', () => {
+  it('returns a normal question when generation works', () => {
+    const q = generateQuestionSafely(['addition'], 1)
+    expect(getQuestionErrors(q)).toEqual([])
+  })
+
+  it('falls back to a valid built-in question when generation fails', () => {
+    const q = generateQuestionSafely(['addition'], 1, undefined, {
+      rng: () => {
+        throw new Error('broken')
+      },
+    })
+    expect(getQuestionErrors(q)).toEqual([])
   })
 })

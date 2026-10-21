@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '../app/settingsContext'
 import { useStorageStatus } from '../app/storageStatusContext'
 import { clearActiveSession, saveActiveSession } from '../services/activeSessionStorage'
-import { generateNextQuestion, generateRandomQuestion } from '../services/questionGenerator'
+import { generateQuestionSafely } from '../services/questionGenerator'
 import { loadMistakePatterns, saveProgress } from '../services/practiceStorage'
 import { generateReviewQuestion, reviewSessionConfig } from '../services/reviewQuestions'
 import {
@@ -13,6 +13,7 @@ import {
   recordResult as applyResult,
   startSession,
 } from '../services/practiceSession'
+import { logDevError } from '../utils/logger'
 import type { Question } from '../types/question'
 import type { ActiveSessionRecord, PracticeConfig, PracticeSessionState } from '../types/session'
 
@@ -23,8 +24,9 @@ function createSession(config: PracticeConfig, threshold: number): PracticeSessi
       const first = generateReviewQuestion(patterns, undefined, { threshold })
       return first ? startSession(reviewSessionConfig(patterns, config, first), first) : null
     }
-    return startSession(config, generateRandomQuestion(config.operations, config.difficulty))
-  } catch {
+    return startSession(config, generateQuestionSafely(config.operations, config.difficulty))
+  } catch (error) {
+    logDevError('Could not start the practice session.', error)
     return null
   }
 }
@@ -38,7 +40,7 @@ function nextQuestionFor(
   if (isLastQuestion(state)) return null
   return config.mode === 'mistake-review'
     ? generateReviewQuestion(loadMistakePatterns(), state.currentQuestion, { threshold })
-    : generateNextQuestion(config.operations, config.difficulty, state.currentQuestion)
+    : generateQuestionSafely(config.operations, config.difficulty, state.currentQuestion)
 }
 
 /**
@@ -52,7 +54,8 @@ function resumeSession(saved: ActiveSessionRecord, threshold: number): PracticeS
     const advanced = advance(state, nextQuestionFor(state, config, threshold))
     saveProgress(state, advanced, threshold)
     return advanced
-  } catch {
+  } catch (error) {
+    logDevError('Could not resume the saved session.', error)
     return null
   }
 }
@@ -84,7 +87,7 @@ export function usePracticeSession(config: PracticeConfig, resumeFrom?: ActiveSe
       return
     }
     const result = saveActiveSession({ config, state: current, selectedAnswer: selected.current })
-    if (!result.ok) reportStorageProblem()
+    if (!result.ok) reportStorageProblem(result.reason)
   }
 
   // A new session is saved right away; a resumed one is already saved.
@@ -97,7 +100,8 @@ export function usePracticeSession(config: PracticeConfig, resumeFrom?: ActiveSe
   function commit(next: PracticeSessionState) {
     const previous = latest.current
     if (!previous || next === previous) return
-    if (!saveProgress(previous, next, threshold).ok) reportStorageProblem()
+    const saved = saveProgress(previous, next, threshold)
+    if (!saved.ok) reportStorageProblem(saved.reason)
     if (next.currentQuestion.id !== previous.currentQuestion.id) selected.current = null
     persist(next)
     latest.current = next
@@ -130,7 +134,8 @@ export function usePracticeSession(config: PracticeConfig, resumeFrom?: ActiveSe
       try {
         // In a review session, a null question (nothing left to review) ends the session.
         commit(advance(current, nextQuestionFor(current, config, threshold)))
-      } catch {
+      } catch (error) {
+        logDevError('Could not move to the next question.', error)
         setNextFailed(true)
       }
     },
